@@ -3,6 +3,13 @@ from selenium.common import exceptions
 import time
 import unittest
 
+# The loggers for selenium and paramiko spew a lot of garbage by default
+import logging
+selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+paramiko_logger = logging.getLogger('paramiko.transport')
+selenium_logger.setLevel(logging.WARNING)
+paramiko_logger.setLevel(logging.WARNING)
+
 
 class BrowserTestCase(unittest.TestCase):
 
