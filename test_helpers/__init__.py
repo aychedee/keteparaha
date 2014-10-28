@@ -10,6 +10,7 @@ paramiko_logger = logging.getLogger('paramiko.transport')
 selenium_logger.setLevel(logging.WARNING)
 paramiko_logger.setLevel(logging.WARNING)
 
+__version__ = '1.1.1'
 
 class BrowserTestCase(unittest.TestCase):
 
