@@ -4,7 +4,7 @@ except ImportError:
         from distutils.core import setup
 
 setup(name="test_helpers",
-    version="1.1.1",
+    version="1.1.2",
     packages=["test_helpers"],
     license="MIT",
     author="Hansel Dunlop",
@@ -12,5 +12,8 @@ setup(name="test_helpers",
     url="https://github.com/aychedee/test-helpers/",
     description="Test helpers to be used with Selenium Webdriver",
     long_description=open("README.md").read(),
-    install_requires=["selenium"],
+    install_requires=[
+        "pyvirtualdisplay",
+        "selenium"
+    ],
 )

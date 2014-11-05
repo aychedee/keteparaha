@@ -1,23 +1,36 @@
+"""A collection of test helpers for use with Selenium Webdriver functional
+tests
+"""
 from selenium import webdriver
-from selenium.common import exceptions
-import time
 import unittest
 
-# The loggers for selenium and paramiko spew a lot of garbage by default
+# The loggers for these packages spew a lot of garbage by default
 import logging
-selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
-paramiko_logger = logging.getLogger('paramiko.transport')
-selenium_logger.setLevel(logging.WARNING)
-paramiko_logger.setLevel(logging.WARNING)
+for verbose_logger in (
+        "selenium.webdriver.remote.remote_connection", "paramiko.transport",
+        "easyprocess", "pyvirtualdisplay.abstractdisplay",
+        "selenium.webdriver.remote.remote_connection",):
+    logger = logging.getLogger(verbose_logger)
+    logger.setLevel(logging.WARNING)
 
-__version__ = '1.1.1'
+
+from .page import Page
+
+__version__ = '1.1.2'
+
 
 class BrowserTestCase(unittest.TestCase):
+    """Browser test case that can be used with Selenium Webdriver to
+    functionally test a website
+    """
 
-    def setUp(self, *args, **kwargs):
-        super(BrowserTestCase, self).setUp(*args, **kwargs)
+    def start_browser(self, driver="Firefox"):
+        """Start and return a Selenium Webdriver browser instance
+        """
+        if not hasattr(self, "_browsers"):
+            self._browsers = list()
         try:
-            driver = getattr(webdriver, kwargs.get("driver", "Firefox"))
+            driver = getattr(webdriver, driver)
         except AttributeError:
             supported_drivers = [
                 d for d in webdriver.__dict__.keys()
@@ -27,46 +40,36 @@ class BrowserTestCase(unittest.TestCase):
                         'DesiredCapabilities'
                     ]
             ]
-            raise Exception(
-                "No such driver. Choose from." % (supported_drivers,))
+            raise ValueError(
+                "No such driver. Choose from: %s" % (
+                    ", ".join(supported_drivers),))
 
-        self.browser = driver()
+        browser = driver()
+        self._browsers.append(browser)
+        self.addCleanup(browser.close)
+        return browser
 
-    def tearDown(self, *args, **kwargs):
-        super(BrowserTestCase, self).tearDown(*args, **kwargs)
-        self.browser.close()
-
-    def wait_for_visibility(self, selector, timeout_seconds=20):
-        pause_interval = 1
-        retries = timeout_seconds / pause_interval
-        while retries:
-            try:
-                element = self.get_via_css(selector)
-                if element.is_displayed():
-                    return element
-            except (exceptions.NoSuchElementException,
-                    exceptions.StaleElementReferenceException):
-                if retries <= 0:
-                    raise
-                else:
-                    pass
-
-            retries = retries - pause_interval
-            time.sleep(pause_interval)
-        raise exceptions.ElementNotVisibleException(
-            "Element %s not visible despite waiting for %s seconds" % (
-                selector, timeout_seconds)
-        )
-
-    def body_text(self):
-        return self.browser.find_element_by_css_selector("body").text
-
-    def get_via_css(self, selector):
+    @property
+    def browser(self):
+        """Returns the last browser started"""
         try:
-            return self.browser.find_element_by_css_selector(selector)
-        except exceptions.NoSuchElementException:
-            raise exceptions.NoSuchElementException(
-                'Could not find element identified by css selector: "%s". '
-                'in page with text: %s' % (selector, self.body_text()[:1000])
-            )
+            return self._browsers[-1]
+        except (IndexError, AttributeError):
+            raise AttributeError(
+                "You need to start a browser before you access it")
 
+
+class HeadlessBrowserTestCase(BrowserTestCase):
+
+    def start_browser(self, size=(800, 600), driver="Firefox", **kwargs):
+        if not hasattr(self, "_display"):
+            from pyvirtualdisplay import Display
+            self._display = Display()
+            self._display.start()
+
+        self.addCleanup(self._display.stop)
+        return super(
+            HeadlessBrowserTestCase, self).start_browser(driver=driver)
+
+    def is_headless(self):
+        return True
