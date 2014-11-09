@@ -34,11 +34,11 @@ class BrowserTestCase(unittest.TestCase):
         except AttributeError:
             supported_drivers = [
                 d for d in webdriver.__dict__.keys()
-                    if d[0].isupper() and d not in [
-                        'ActionChains', 'FirefoxProfile',
-                        'ChromeOptions', 'TouchActions',
-                        'DesiredCapabilities'
-                    ]
+                if d[0].isupper() and d not in [
+                    'ActionChains', 'FirefoxProfile',
+                    'ChromeOptions', 'TouchActions',
+                    'DesiredCapabilities'
+                ]
             ]
             raise ValueError(
                 "No such driver. Choose from: %s" % (
@@ -58,18 +58,29 @@ class BrowserTestCase(unittest.TestCase):
             raise AttributeError(
                 "You need to start a browser before you access it")
 
+    def is_headless(self):
+        """Used to determine if the test is running in a headless env"""
+        return hasattr(self, "_display")
+
 
 class HeadlessBrowserTestCase(BrowserTestCase):
+    """Seleniun Webdiver test case for headless environemnts
+
+    Browser test case that will start a virtual display to run the
+    Webdriver browser in before running test cases
+    """
 
     def start_browser(self, size=(800, 600), driver="Firefox", **kwargs):
+        """Start xvfb headless display and a browser inside it
+
+        Extra keyword args are passed directly to the XvFB interface
+
+        """
         if not hasattr(self, "_display"):
             from pyvirtualdisplay import Display
-            self._display = Display()
+            self._display = Display(size=size, **kwargs)
             self._display.start()
 
         self.addCleanup(self._display.stop)
         return super(
             HeadlessBrowserTestCase, self).start_browser(driver=driver)
-
-    def is_headless(self):
-        return True

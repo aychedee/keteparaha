@@ -1,8 +1,25 @@
+"""Page class, intended to be sub classed as an abstraction for a real web page
+
+Page classes collect the logic for how to use a certain part of the web site
+under test into one area.
+
+"""
 import time
 from selenium.common import exceptions
 
 
 class Page(object):
+    """Generic web page, intended to be subclassed
+
+    class LoginPage(Page):
+
+        def login(username, password):
+            self.browser.get("/login")
+            self.get_all_via_css("input[name=username]").send_keys(username)
+            self.get_all_via_css("input[name=password]").send_keys(password)
+            self.get_all_via_css("input[type=submit]").click()
+            return Dashboard(self.tc)
+    """
 
     def __init__(self, tc, browser=None):
         self.tc = tc
@@ -13,12 +30,11 @@ class Page(object):
             self.browser = tc.browser
 
     def click(self, link_text):
+        """Convenience method for clicking links"""
         self.browser.find_element_by_link_text(link_text).click()
 
-    def logout(self):
-        self.browser.get("/logout")
-
     def get_via_css(self, selector):
+        """Shortand for getting html elements via css selectors"""
         try:
             return self.browser.find_element_by_css_selector(selector)
         except exceptions.NoSuchElementException:
@@ -27,6 +43,7 @@ class Page(object):
                 'in page with text: %s' % (selector, self.body_text()[:1000]))
 
     def get_all_via_css(self, selector):
+        """Shortand for getting a list of html elements via css selectors"""
         try:
             return self.browser.find_elements_by_css_selector(selector)
         except exceptions.NoSuchElementException:
@@ -35,12 +52,25 @@ class Page(object):
                 'in page with text: %s' % (selector, self.body_text()[:1000]))
 
     def drop_into_shell(self):
+        """Drop into an IPython shell at the point this method is called
+
+        Useful for interactive debugging. Inside the shell self is the
+        test case and all created page objects will be available in
+        self.pages.
+
+        """
         self.tc.drop_into_shell()
 
     def body_text(self):
+        """Get body text for current page"""
         return self.get_via_css("body").text
 
     def wait_for_visibility(self, selector, timeout_seconds=20):
+        """Waits for an element to be displayed and returns it
+
+        Raises an ElementNotVisibleException if the element does not become
+        visible or doesn't exist after the timeout.
+        """
         pause_interval = 1
         retries = timeout_seconds / pause_interval
         while retries:
@@ -63,6 +93,7 @@ class Page(object):
         )
 
     def click_button_with_text(self, text):
+        """Find buttons on the page and click the first one with the text"""
         for button in self.get_all_via_css("button"):
             if button.text == text and button.is_displayed():
                 button.click()
