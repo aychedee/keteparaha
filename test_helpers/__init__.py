@@ -9,7 +9,7 @@ import sys
 import time
 import unittest
 
-__version__ = '1.1.3'
+__version__ = '1.1.4'
 
 # The loggers for these packages spew a lot of garbage by default
 import logging
@@ -27,7 +27,7 @@ def snapshot_on_error(method):
     By default these are saved in the home directory, to change the
     snapshot location set SNAPSHOT_PATH on the test case.
     """
-    SNAPSHOT_PATH = getattr(method, "SNAPSHOT_PATH", os.path.exapanduser("~"))
+    SNAPSHOT_PATH = getattr(method, "SNAPSHOT_PATH", os.path.expanduser("~"))
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         try:
