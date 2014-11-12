@@ -20,6 +20,8 @@ for verbose_logger in (
     logger = logging.getLogger(verbose_logger)
     logger.setLevel(logging.WARNING)
 
+FRAME_SIZE = (1300, 1080)
+
 
 def snapshot_on_error(method):
     """A decorator that captures a snapshot of all browsers on error
@@ -69,7 +71,7 @@ class BrowserTestCase(unittest.TestCase):
     functionally test a website
     """
 
-    def start_browser(self, driver="Firefox"):
+    def start_browser(self, size=FRAME_SIZE, driver="Firefox"):
         """Start and return a Selenium Webdriver browser instance
         """
         if not hasattr(self, "_browsers"):
@@ -90,6 +92,7 @@ class BrowserTestCase(unittest.TestCase):
                     ", ".join(supported_drivers),))
 
         browser = driver()
+        browser.set_window_size(*size)
         self._browsers.append(browser)
         self.addCleanup(browser.close)
         return browser
@@ -115,7 +118,7 @@ class HeadlessBrowserTestCase(BrowserTestCase):
     Webdriver browser in before running test cases
     """
 
-    def start_browser(self, size=(800, 600), driver="Firefox", **kwargs):
+    def start_browser(self, size=FRAME_SIZE, driver="Firefox", **kwargs):
         """Start xvfb headless display and a browser inside it
 
         Extra keyword args are passed directly to the XvFB interface
@@ -123,9 +126,10 @@ class HeadlessBrowserTestCase(BrowserTestCase):
         """
         if not hasattr(self, "_display"):
             from pyvirtualdisplay import Display
-            self._display = Display(size=size, **kwargs)
+            self._display = Display(visible=0, size=size, **kwargs)
             self._display.start()
 
         self.addCleanup(self._display.stop)
         return super(
-            HeadlessBrowserTestCase, self).start_browser(driver=driver)
+            HeadlessBrowserTestCase, self).start_browser(
+                size=size, driver=driver)
