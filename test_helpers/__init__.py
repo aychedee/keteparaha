@@ -1,8 +1,15 @@
 """A collection of test helpers for use with Selenium Webdriver functional
 tests
 """
+from functools import wraps
+import math
+import os
 from selenium import webdriver
+import sys
+import time
 import unittest
+
+__version__ = '1.1.3'
 
 # The loggers for these packages spew a lot of garbage by default
 import logging
@@ -14,9 +21,47 @@ for verbose_logger in (
     logger.setLevel(logging.WARNING)
 
 
-from .page import Page
+def snapshot_on_error(method):
+    """A decorator that captures a snapshot of all browsers on error
 
-__version__ = '1.1.2'
+    By default these are saved in the home directory, to change the
+    snapshot location set SNAPSHOT_PATH on the test case.
+    """
+    SNAPSHOT_PATH = getattr(method, "SNAPSHOT_PATH", os.path.exapanduser("~"))
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        try:
+            method(self, *args, **kwargs)
+        except Exception as test_exception:
+            test_traceback = sys.exc_info()[2]
+            for idx, browser in enumerate(self.browsers):
+                try:
+                    body = browser.find_element_by_tag_name('body')
+                    body_height = body.size['height']
+                    window_height = browser.get_window_size()['height']
+                    pages = int(math.ceil(float(body_height) / window_height))
+                except:
+                    pages = 0
+
+                for i in range(pages):
+                    browser.execute_script(
+                        'window.scrollTo(0,%s)' % (i*window_height))
+                    time.sleep(0.2)
+                    browser.get_screenshot_as_file(
+                        SNAPSHOT_PATH + "/%s_browser-%s_page-%s.png" % (
+                            self.id(),
+                            idx,
+                            i
+                        )
+                    )
+
+        finally:
+            if 'test_exception' in locals():
+                raise test_exception, None, test_traceback
+    return wrapper
+
+
+from .page import Page
 
 
 class BrowserTestCase(unittest.TestCase):
