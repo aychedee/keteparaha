@@ -9,7 +9,7 @@ import sys
 import time
 import unittest
 
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 
 # The loggers for these packages spew a lot of garbage by default
 import logging
@@ -35,6 +35,7 @@ def snapshot_on_error(method):
         try:
             method(self, *args, **kwargs)
         except Exception as test_exception:
+
             test_traceback = sys.exc_info()[2]
             for idx, browser in enumerate(self.browsers):
                 try:

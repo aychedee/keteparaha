@@ -4,7 +4,7 @@ except ImportError:
         from distutils.core import setup
 
 setup(name="test_helpers",
-    version="1.1.4",
+    version="1.1.5",
     packages=["test_helpers"],
     license="MIT",
     author="Hansel Dunlop",

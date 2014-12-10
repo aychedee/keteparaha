@@ -92,6 +92,30 @@ class Page(object):
                 selector, timeout_seconds)
         )
 
+    def wait_for_invisibility(self, selector, timeout_seconds=20):
+        """Waits for an element to not be displayed or not exist
+
+        Raises an InvalidElementStateException if the element does not become
+        invisible or exists after the timeout.
+        """
+        pause_interval = 1
+        retries = timeout_seconds / pause_interval
+        while retries:
+            try:
+                element = self.get_via_css(selector)
+                if not element.is_displayed():
+                    return element
+            except (exceptions.NoSuchElementException,
+                    exceptions.StaleElementReferenceException):
+                return None
+
+            retries = retries - pause_interval
+            time.sleep(pause_interval)
+        raise exceptions.InvalidElementStateException(
+            "Element %s is visible despite waiting for %s seconds" % (
+                selector, timeout_seconds)
+        )
+
     def click_button_with_text(self, text):
         """Find buttons on the page and click the first one with the text"""
         for button in self.get_all_via_css("button"):
