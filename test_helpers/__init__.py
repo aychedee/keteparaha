@@ -37,7 +37,7 @@ def snapshot_on_error(method):
         except Exception as test_exception:
 
             test_traceback = sys.exc_info()[2]
-            for idx, browser in enumerate(self.browsers):
+            for idx, browser in enumerate(self._browsers):
                 try:
                     body = browser.find_element_by_tag_name('body')
                     body_height = body.size['height']
