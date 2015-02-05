@@ -3,16 +3,19 @@ try:
 except ImportError:
         from distutils.core import setup
 
-setup(name="test_helpers",
-    version="1.1.5",
-    packages=["test_helpers"],
+execfile("keteparaha/__init__.py")
+
+setup(name="keteparaha",
+    version=__version__,
+    packages=["keteparaha"],
     license="MIT",
     author="Hansel Dunlop",
     author_email="hansel@interpretthis.org",
-    url="https://github.com/aychedee/test-helpers/",
-    description="Test helpers to be used with Selenium Webdriver",
+    url="https://github.com/aychedee/keteparaha/",
+    description="Keteparaha is a collection of tools to help when functional testing",
     long_description=open("README.md").read(),
     install_requires=[
+        "imapclient",
         "pyvirtualdisplay",
         "selenium"
     ],

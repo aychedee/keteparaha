@@ -1,7 +1,15 @@
-test-helpers
-============
+Keteparaha
+==========
 
-Collection of test helpers, specifically for Selenium Webdriver functional tests
+Keteparaha is a collection of tools to help when functional testing
+
+It contains utilities that assist with tasks like running a browser in a
+headless environment, or checking that emails have been sent, or a file has
+been uploaded to a server, or common testing flow control like retrying or
+ignoring certain errors.
+
+:copyright: (c) 2015 by Hansel Dunlop.
+:license: GPLv3, see LICENSE for more details
 
 
 BrowserTestCase
@@ -78,3 +86,21 @@ tests.
             dashboard.login()
 
             dashboard.assert_logged_in()
+
+Email
+-----
+
+The email module contains a imap client written to interact with gmail. This
+is especially useful if your organiation uses Google Apps and you're running
+tests against it.
+
+
+Flow Control
+------------
+
+This module contains three functions that are intended to make flow control in
+testing situations less painful. They can be used as decorators. They are:
+
+* retry
+* ignore
+* fallback

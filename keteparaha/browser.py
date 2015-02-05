@@ -1,5 +1,16 @@
-"""A collection of test helpers for use with Selenium Webdriver functional
-tests
+"""
+    Keteparaha
+    ~~~~~~~~~~
+
+    Keteparaha is a collection of tools to help when functional testing
+
+    It contains utilities that assist with tasks like running a browser in a
+    headless environment, or checking that emails have been sent, or a file has
+    been uploaded to a server, or common testing flow control like retrying or
+    ignoring certain errors.
+
+    :copyright: (c) 2015 by Hansel Dunlop.
+    :license: MIT, see LICENSE for more details
 """
 from functools import wraps
 import math
@@ -8,8 +19,6 @@ from selenium import webdriver
 import sys
 import time
 import unittest
-
-__version__ = '1.1.5'
 
 # The loggers for these packages spew a lot of garbage by default
 import logging
@@ -62,9 +71,6 @@ def snapshot_on_error(method):
             if 'test_exception' in locals():
                 raise test_exception, None, test_traceback
     return wrapper
-
-
-from .page import Page
 
 
 class BrowserTestCase(unittest.TestCase):
