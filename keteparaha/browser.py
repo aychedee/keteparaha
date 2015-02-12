@@ -42,7 +42,8 @@ def snapshot_on_error(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         SNAPSHOT_PATH = getattr(self, "SNAPSHOT_PATH", os.path.expanduser("~"))
-        os.makedirs(SNAPSHOT_PATH)
+        if not os.path.exists(SNAPSHOT_PATH):
+            os.makedirs(SNAPSHOT_PATH)
         try:
             method(self, *args, **kwargs)
         except Exception as test_exception:
