@@ -36,11 +36,13 @@ def snapshot_on_error(method):
     """A decorator that captures a snapshot of all browsers on error
 
     By default these are saved in the home directory, to change the
-    snapshot location set SNAPSHOT_PATH on the test case.
+    snapshot location set SNAPSHOT_PATH on the test case. The snapshot
+    directory will be created if possible.
     """
-    SNAPSHOT_PATH = getattr(method, "SNAPSHOT_PATH", os.path.expanduser("~"))
     @wraps(method)
     def wrapper(self, *args, **kwargs):
+        SNAPSHOT_PATH = getattr(self, "SNAPSHOT_PATH", os.path.expanduser("~"))
+        os.makedirs(SNAPSHOT_PATH)
         try:
             method(self, *args, **kwargs)
         except Exception as test_exception:
