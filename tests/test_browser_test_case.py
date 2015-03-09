@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from test_helpers import BrowserTestCase
+from keteparaha.browser import BrowserTestCase
 
 
 class BrowserTestCaseTest(TestCase):
