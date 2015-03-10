@@ -16,6 +16,9 @@ class CoolPage(Page):
 class Modal(Component):
     component_selector = '#modal-id'
 
+    def __repr__(self):
+        return super(Modal, self).__repr__()
+
 
 class MockDriver(object):
 
@@ -50,9 +53,34 @@ class PageTest(TestCase):
 
         self.assertIsInstance(cool_page, CoolPage)
 
-    def test_dynamically_returns_(self):
+    def test_dynamically_returns_component(self):
         home = HomePage(MockTestCase('do_nothing'), driver=MockDriver())
         home._driver.current_url = CoolPage.url
         modal = home.click('.btn', opens='#modal-id')
 
         self.assertIsInstance(modal, Modal)
+
+
+class ComponentTest(TestCase):
+
+    def test_component_repr(self):
+        home = HomePage(MockTestCase('do_nothing'), driver=MockDriver())
+        self.assertEqual(repr(Modal(home)), 'Modal(selector="#modal-id")')
+
+    def test_get_component_with_passed_in_component_class(self):
+        home = HomePage(MockTestCase('do_nothing'), driver=MockDriver())
+        modal = home.get_component(Modal)
+
+        assert isinstance(modal, Component)
+
+    def test_get_component_with_passed_in_component_selector(self):
+        home = HomePage(MockTestCase('do_nothing'), driver=MockDriver())
+        modal = home.get_component('#modal-id')
+
+        assert isinstance(modal, Component)
+
+    def test_get_component_with_nonexistent_passed_in_component_selector(self):
+        home = HomePage(MockTestCase('do_nothing'), driver=MockDriver())
+        modal = home.get_component('#modal-id2')
+
+        assert isinstance(modal, Component)

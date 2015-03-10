@@ -7,13 +7,61 @@ under test into one area.
 import time
 from selenium.common import exceptions
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support.wait import TimeoutException, WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
 ELEMENT_TIMEOUT = 10
 
 
 class SeleniumWrapper(object):
+
+    class ComponentMissing(Exception):
+        pass
+
+    def _get_component_class(self, component_or_selector):
+        """Ensure we have a component
+
+        Find a return if arguement is component, get registered component,
+        or dynamically create a component.
+
+        """
+        if isinstance(component_or_selector, Component):
+            return component_or_selector(self)
+        try:
+            return self._registry[component_or_selector]
+        except KeyError:
+            return type(
+                'DynamicComponent',
+                (Component,), {'selector': component_or_selector}
+            )
+
+    def get_component(self, component_or_selector):
+        """Return an initialised component present in page
+
+        takes either a component class to find in the page or a css selector.
+
+        If the selector is not present in the page raises a ComponentMissing
+        error.
+        """
+        ComponentClass = self._get_component_class(component_or_selector)
+
+        try:
+            return ComponentClass(self)
+        except TimeoutException:
+            raise self.ComponentMissing(
+                '{} could not be found in page'.format(ComponentClass))
+
+    def get_components(self, component_or_selector):
+        """Return an list of initialised components present in page
+
+        Returns an empty list if no components could be found
+        """
+        ComponentClass = self._get_component_class(component_or_selector)
+
+        return [
+            ComponentClass(self._parent, el)
+                for el in self.get_elements(ComponentClass.selector)
+        ]
 
     def _wait_for_condition(self, condition):
         """Wait until the expected condition is true and return the result"""
@@ -50,7 +98,7 @@ class SeleniumWrapper(object):
     def _click(self, element, opens=None):
         element.click()
         if opens:
-            return self._registry[opens](self, opens)
+            return self._registry[opens](self)
         if self.url != self.location() and self.location() in self._registry:
             return self._registry[self._driver.current_url](
                 self.tc, driver=self._driver)
@@ -102,7 +150,6 @@ class SeleniumWrapper(object):
         return self._element.text
 
 
-
 class RegisterMeta(type):
 
     def __init__(cls, name, bases, dct):
@@ -120,19 +167,27 @@ class Registry(object):
 
 class Component(SeleniumWrapper, Registry):
     __metaclass__ = RegisterMeta
-    component_selector = None
+    selector = None
 
-    def __init__(self, page, selector):
-        self._page = page
-        self._driver = page._driver
-        self._element = self.get_element(selector)
+    def __repr__(self):
+        return '{}(selector="{}")'.format(
+            self.__class__.__name__, self.component_selector)
+
+    def __init__(self, parent, element=None):
+        self._parent = parent
+        self._driver = parent._driver
+        if element:
+            self._element = element
+        else:
+            self._element = self.get_element(self.selector)
 
 
 class Page(SeleniumWrapper, Registry):
     """Generic web page, intended to be subclassed
 
-    class LoginPage(Page):
+    Pages and Components are
 
+    class LoginPage(Page):
         url = 'https://your-site.com/login
 
         def login(username, password):
