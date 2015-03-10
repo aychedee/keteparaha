@@ -101,11 +101,11 @@ class BrowserTestCase(unittest.TestCase):
                 "No such driver. Choose from: %s" % (
                     ", ".join(supported_drivers),))
 
-        browser = driver()
-        browser.set_window_size(*size)
-        self._browsers.append(browser)
-        self.addCleanup(browser.close)
-        return browser
+        self._driver = driver()
+        self._driver.set_window_size(*size)
+        self._browsers.append(self._driver)
+        self.addCleanup(self._driver.close)
+        return self._driver
 
     @property
     def browser(self):

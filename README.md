@@ -92,7 +92,7 @@ Email
 -----
 
 The email module contains a imap client written to interact with gmail. This
-is especially useful if your organiation uses Google Apps and you're running
+is especially useful if you use Google Apps and you're running
 tests against it.
 
 

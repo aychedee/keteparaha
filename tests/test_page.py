@@ -14,7 +14,7 @@ class CoolPage(Page):
 
 
 class Modal(Component):
-    component_selector = '#modal-id'
+    selector = '#modal-id'
 
     def __repr__(self):
         return super(Modal, self).__repr__()

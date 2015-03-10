@@ -7,8 +7,9 @@ under test into one area.
 import time
 from selenium.common import exceptions
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import TimeoutException, WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.wait import TimeoutException, WebDriverWait
 
 ELEMENT_TIMEOUT = 10
 
@@ -21,7 +22,7 @@ class SeleniumWrapper(object):
     def _get_component_class(self, component_or_selector):
         """Ensure we have a component
 
-        Find a return if arguement is component, get registered component,
+        Either return argument if it's a component, get a registered component,
         or dynamically create a component.
 
         """
@@ -32,7 +33,10 @@ class SeleniumWrapper(object):
         except KeyError:
             return type(
                 'DynamicComponent',
-                (Component,), {'selector': component_or_selector}
+                (Component,), {
+                    '_parent': self,
+                    'selector': component_or_selector
+                }
             )
 
     def get_component(self, component_or_selector):
@@ -58,25 +62,40 @@ class SeleniumWrapper(object):
         """
         ComponentClass = self._get_component_class(component_or_selector)
 
-        return [
-            ComponentClass(self._parent, el)
-                for el in self.get_elements(ComponentClass.selector)
-        ]
+        try:
+            return [
+                ComponentClass(self, el)
+                    for el in self.get_elements(ComponentClass.selector)
+            ]
+        except TimeoutException:
+            return []
 
-    def _wait_for_condition(self, condition):
+    def _wait_for_condition(self, condition, message='', driver=None):
         """Wait until the expected condition is true and return the result"""
-        return WebDriverWait(self._driver, ELEMENT_TIMEOUT).until(condition)
+        if not driver:
+            driver = self._element
+        return WebDriverWait(driver, ELEMENT_TIMEOUT).until(condition, message)
 
-    def get_element(self, selector):
+    def get_element(self, selector, driver=None):
         """Get the DOM element identified by the css selector"""
         return self._wait_for_condition(
-            ec.presence_of_element_located((By.CSS_SELECTOR, selector))
+            ec.presence_of_element_located((By.CSS_SELECTOR, selector)),
+            message='No element found with selector "{}".'.format(selector),
+            driver=driver
+        )
+
+    def get_visible_element(self, selector):
+        return self._wait_for_condition(
+            ec.visibility_of_element_located((By.CSS_SELECTOR, selector)),
+            message='No visible element found with selector "{}".'.format(
+                selector)
         )
 
     def get_element_by_link_text(self, link_text):
         """Get the DOM element identified by the css selector"""
         return self._wait_for_condition(
-            ec.presence_of_element_located((By.LINK_TEXT, link_text))
+            ec.presence_of_element_located((By.LINK_TEXT, link_text)),
+            message='No link with text "{}".'.format(link_text)
         )
 
     def get_elements(self, selector):
@@ -85,9 +104,18 @@ class SeleniumWrapper(object):
             ec.presence_of_all_elements_located((By.CSS_SELECTOR, selector))
         )
 
+    def get_attribute(self, attribute):
+        return self._element.get_attribute(attribute)
+
+    def wait_for_invisibility(self, selector):
+        return self.assert_element_invisible(selector)
+
     def assert_text_in_element(self, selector, text):
         return self._wait_for_condition(
-            ec.text_to_be_present_in_element((By.CSS_SELECTOR, selector), text)
+            ec.text_to_be_present_in_element(
+                (By.CSS_SELECTOR, selector), text),
+            message=u'"{}" not found in "{}"'.format(
+                text, self.get_component(selector).text)
         )
 
     def assert_element_invisible(self, selector):
@@ -96,28 +124,55 @@ class SeleniumWrapper(object):
         )
 
     def _click(self, element, opens=None):
+        """Click an element and return an appropriate component or page
+
+        Element is a selenium WebElement, opens can be either a css
+        selector or a subclass of Component
+        """
         element.click()
         if opens:
-            return self._registry[opens](self)
+            return self._get_component_class(opens)(self)
+
         if self.url != self.location() and self.location() in self._registry:
             return self._registry[self._driver.current_url](
                 self.tc, driver=self._driver)
         return self
 
-    def click(self, selector, opens=None):
-        """Main method for interacting with a page
+    def click(self, selector=None, opens=None):
+        """Main method for interacting with a page or component
 
         Returns either self, a new page object based on browser url, or a
         page component based on the selector passed in as 'opens'.
+        selector can be a css selector in the form of a string, or a
+        selenium WebElement.
 
         """
-        return self._click(self.get_element(selector), opens)
+        return self._click(self._ensure_element(selector), opens)
 
     def click_link(self, link_text, opens=None):
         return self._click(self.get_element_by_link_text(link_text), opens)
 
+    def click_button(self, button_text, opens=None):
+        """Find buttons on the page and click the first one with the text"""
+        for button in self._element.find_elements_by_tag_name("button"):
+            if button.text == button_text and button.is_displayed():
+                return self._click(button, opens)
+        raise AssertionError(
+            "Could not find a button with the text '%s'" % (button_text,)
+        )
+    def _ensure_element(self, selector_or_element):
+        if isinstance(selector_or_element, basestring):
+            return self.get_element(selector_or_element)
+        if selector_or_element is None:
+            # We hit this case when we want to click on the parent component
+            return self._element
+        return selector_or_element
+
     def location(self):
         return self._driver.current_url.split('?')[0]
+
+    def select_option(self, selector, option_text):
+        Select(self.get_element(selector)).select_by_visible_text(option_text)
 
     def enter_text(self, selector, text):
         """Enter text into DOM element identified by selector
@@ -126,7 +181,7 @@ class SeleniumWrapper(object):
         send_keys on the element is unreliable at text entry.
 
         """
-        element = self.get_element(selector)
+        element = self.get_visible_element(selector)
         for _ in range(5):
             element.send_keys(*text)
             try:
@@ -155,8 +210,8 @@ class RegisterMeta(type):
     def __init__(cls, name, bases, dct):
         if dct.get('url'):
             cls._registry[dct.get('url')] = cls
-        elif dct.get('component_selector'):
-            cls._registry[dct.get('component_selector')] = cls
+        elif dct.get('selector'):
+            cls._registry[dct.get('selector')] = cls
 
         return super(RegisterMeta, cls).__init__(name, bases, dct)
 
@@ -171,15 +226,24 @@ class Component(SeleniumWrapper, Registry):
 
     def __repr__(self):
         return '{}(selector="{}")'.format(
-            self.__class__.__name__, self.component_selector)
+            self.__class__.__name__, self.selector)
 
     def __init__(self, parent, element=None):
+        self.tc = parent.tc
         self._parent = parent
         self._driver = parent._driver
         if element:
             self._element = element
         else:
-            self._element = self.get_element(self.selector)
+            self._element = self.get_element(self.selector, driver=self._driver)
+
+    @property
+    def url(self):
+        print self.__class__.mro()
+        print self._parent
+        if isinstance(self._parent, Page):
+            return self._parent.url
+        return self._parent.url
 
 
 class Page(SeleniumWrapper, Registry):
@@ -203,10 +267,16 @@ class Page(SeleniumWrapper, Registry):
         if driver:
             self._driver = driver
         else:
-            self._driver = tc.browser
-        self._driver.get(self.url)
-        self._element = self.get_element('body')
+            self._driver = tc._driver
+        if self.location() != self.url:
+            self._driver.get(self.url)
+        self._element = self.get_element('body', driver=self._driver)
 
+    def assert_text_in_page(self, text):
+        self.assert_text_in_element('body', text)
+
+
+class UnUsed(object):
     def get_via_css(self, selector):
         """Shortand for getting html elements via css selectors"""
         try:
