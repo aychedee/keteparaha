@@ -1,3 +1,13 @@
+0.0.8 2015-03-11
+----------------
+
+Added
+=====
+
+- Subclasses of component can be passed as the value of the open argument to
+a page or components click method.
+
+
 0.0.7 2015-03-11 
 ----------------
 

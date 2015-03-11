@@ -62,29 +62,38 @@ Page
 ----
 
 The Page class represents a page in your application and should be subclassed
-and extended. It's really just a suggestion of how you might organise your
-tests.
+and extended. Pages are given urls. Whenever you click a component of your
+site and the URL changes the associated page will be returned. Creating an
+instance of a class will automatically visit that page.
 
     from test_helpers import Page
+    SERVER_URL = 'http://your-site.com/{}'
 
-
-    class YourDashboard(Page):
+    class LoginPage(Page):
+        url = SERVER_URL.format('login/')
 
         def login(self, username, password):
-            self.click_button_with_text("Login")
-            self.get_via_css("input[name=username]").send_keys(username)
-            self.get_via_css("input[name=password]").send_keys(password)
-            self.get_via_css("input[type=submit]").click()
+            self.click_button("Login")
+            self.enter_text("input[name=username]", username)
+            self.enter_text("input[name=password]", password)
+            return self.click("input[type=submit]")
+
+    class YourDashboard(Page):
+        url = SERVER_URL.format('dashboard/')
 
         def assert_logged_in(self):
-            self.get_via_css(".account-details").is_displayed()
+            # Will raise an exception if component not present
+            self.get_component(".account-details")
 
 
     class YourTestCase(BrowserTestCase):
 
+        def setUp(self):
+            self.start_browser()
+
         def test_login_works(self):
-            dashboard = YourDashboard(browser=self.start_browser())
-            dashboard.login()
+            login_page = LoginPage(driver=self._driver)
+            dashboard = login_page.login('username', 'password')
 
             dashboard.assert_logged_in()
 

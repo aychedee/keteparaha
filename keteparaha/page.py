@@ -4,6 +4,7 @@ Page classes collect the logic for how to use a certain part of the web site
 under test into one area.
 
 """
+from inspect import isclass
 import time
 from selenium.common import exceptions
 from selenium.webdriver.common.by import By
@@ -20,14 +21,15 @@ class SeleniumWrapper(object):
         pass
 
     def _get_component_class(self, component_or_selector):
-        """Ensure we have a component
+        """Ensure we have a component class
 
         Either return argument if it's a component, get a registered component,
         or dynamically create a component.
 
         """
-        if isinstance(component_or_selector, Component):
-            return component_or_selector(self)
+        if isclass(component_or_selector) and issubclass(
+                component_or_selector, Component):
+            return component_or_selector
         try:
             return self._registry[component_or_selector]
         except KeyError:
@@ -163,6 +165,8 @@ class SeleniumWrapper(object):
     def _ensure_element(self, selector_or_element):
         if isinstance(selector_or_element, basestring):
             return self.get_element(selector_or_element)
+        if isinstance(selector_or_element, Component):
+            return self.get_element(selector_or_element.selector)
         if selector_or_element is None:
             # We hit this case when we want to click on the parent component
             return self._element
@@ -239,8 +243,6 @@ class Component(SeleniumWrapper, Registry):
 
     @property
     def url(self):
-        print self.__class__.mro()
-        print self._parent
         if isinstance(self._parent, Page):
             return self._parent.url
         return self._parent.url
