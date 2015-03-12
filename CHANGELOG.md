@@ -1,3 +1,15 @@
+0.0.9 2015-03-12
+----------------
+
+Added
+=====
+
+- Adds a hover method so that we can trigger dropdowns and the like
+- Add a clear method that takes a selector
+- Components refresh their element before returning their text
+- Adds a has_text method to all pages and components. Remove the assertions
+  from the page/component class. These should live in the test case
+
 0.0.8 2015-03-11
 ----------------
 

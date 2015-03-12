@@ -7,6 +7,7 @@ under test into one area.
 from inspect import isclass
 import time
 from selenium.common import exceptions
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
@@ -16,6 +17,9 @@ ELEMENT_TIMEOUT = 10
 
 
 class SeleniumWrapper(object):
+
+    TimeoutException = TimeoutException
+
 
     class ComponentMissing(Exception):
         pass
@@ -112,13 +116,21 @@ class SeleniumWrapper(object):
     def wait_for_invisibility(self, selector):
         return self.assert_element_invisible(selector)
 
-    def assert_text_in_element(self, selector, text):
+    def text_in_element(self, selector, text):
         return self._wait_for_condition(
             ec.text_to_be_present_in_element(
                 (By.CSS_SELECTOR, selector), text),
-            message=u'"{}" not found in "{}"'.format(
+            message=u'"{}" not found in "{}".'.format(
                 text, self.get_component(selector).text)
         )
+
+    def has_text(self, text):
+        self._update_element()
+        if isinstance(self, Page):
+            selector = 'body'
+        else:
+            selector = self.selector
+        return self.text_in_element(selector, text)
 
     def assert_element_invisible(self, selector):
         return self._wait_for_condition(
@@ -136,7 +148,7 @@ class SeleniumWrapper(object):
             return self._get_component_class(opens)(self)
 
         if self.url != self.location() and self.location() in self._registry:
-            return self._registry[self._driver.current_url](
+            return self._registry[self.location()](
                 self.tc, driver=self._driver)
         return self
 
@@ -178,6 +190,20 @@ class SeleniumWrapper(object):
     def select_option(self, selector, option_text):
         Select(self.get_element(selector)).select_by_visible_text(option_text)
 
+    def clear(self, selector):
+        try:
+            self.get_visible_element(selector).clear()
+        except (exceptions.InvalidElementStateException,
+                exceptions.WebDriverException):
+            raise exceptions.WebDriverException(
+                'You cannot clear that element')
+
+    def hover(self, selector, opens=None):
+        ActionChains(self._driver).move_to_element(
+            self.get_element(selector)).perform()
+        if opens:
+            return self._get_component_class(opens)(self)
+
     def enter_text(self, selector, text):
         """Enter text into DOM element identified by selector
 
@@ -204,10 +230,6 @@ class SeleniumWrapper(object):
             time.sleep(0.2)
         raise AssertionError("Unable to correctly type {}".format(text))
 
-    @property
-    def text(self):
-        return self._element.text
-
 
 class RegisterMeta(type):
 
@@ -224,7 +246,20 @@ class Registry(object):
     _registry = dict()
 
 
-class Component(SeleniumWrapper, Registry):
+class BaseComponent(object):
+
+    _element = None
+
+    @property
+    def text(self):
+        self._update_element()
+        return self._element.text
+
+    def _update_element(self):
+        self._element = self.get_element(self.selector, driver=self._driver)
+
+
+class Component(BaseComponent, SeleniumWrapper, Registry):
     __metaclass__ = RegisterMeta
     selector = None
 
@@ -239,7 +274,7 @@ class Component(SeleniumWrapper, Registry):
         if element:
             self._element = element
         else:
-            self._element = self.get_element(self.selector, driver=self._driver)
+            self._update_element()
 
     @property
     def url(self):
@@ -248,10 +283,10 @@ class Component(SeleniumWrapper, Registry):
         return self._parent.url
 
 
-class Page(SeleniumWrapper, Registry):
+class Page(BaseComponent, SeleniumWrapper, Registry):
     """Generic web page, intended to be subclassed
 
-    Pages and Components are
+    Pages and Components are stored in a registry and switched to dynamically
 
     class LoginPage(Page):
         url = 'https://your-site.com/login
@@ -265,6 +300,7 @@ class Page(SeleniumWrapper, Registry):
     url = None
 
     def __init__(self, tc, driver=None):
+        self.selector = 'html'
         self.tc = tc
         if driver:
             self._driver = driver
@@ -272,101 +308,4 @@ class Page(SeleniumWrapper, Registry):
             self._driver = tc._driver
         if self.location() != self.url:
             self._driver.get(self.url)
-        self._element = self.get_element('body', driver=self._driver)
-
-    def assert_text_in_page(self, text):
-        self.assert_text_in_element('body', text)
-
-
-class UnUsed(object):
-    def get_via_css(self, selector):
-        """Shortand for getting html elements via css selectors"""
-        try:
-            return self._driver.find_element_by_css_selector(selector)
-        except exceptions.NoSuchElementException:
-            raise exceptions.NoSuchElementException(
-                'Could not find element identified by css selector: "%s". '
-                'in page with text: %s' % (selector, self.body_text()[:1000]))
-
-    def get_all_via_css(self, selector):
-        """Shortand for getting a list of html elements via css selectors"""
-        try:
-            return self._driver.find_elements_by_css_selector(selector)
-        except exceptions.NoSuchElementException:
-            raise exceptions.NoSuchElementException(
-                'Could not find elements identified by css selector: "%s". '
-                'in page with text: %s' % (selector, self.body_text()[:1000]))
-
-    def drop_into_shell(self):
-        """Drop into an IPython shell at the point this method is called
-
-        Useful for interactive debugging. Inside the shell self is the
-        test case.
-
-        """
-        self.tc.drop_into_shell()
-
-    def body_text(self):
-        """Get body text for current page"""
-        return self.get_via_css("body").text
-
-    def wait_for_visibility(self, selector, timeout_seconds=20):
-        """Waits for an element to be displayed and returns it
-
-        Raises an ElementNotVisibleException if the element does not become
-        visible or doesn't exist after the timeout.
-        """
-        pause_interval = 1
-        retries = timeout_seconds / pause_interval
-        while retries:
-            try:
-                element = self.get_via_css(selector)
-                if element.is_displayed():
-                    return element
-            except (exceptions.NoSuchElementException,
-                    exceptions.StaleElementReferenceException):
-                if retries <= 0:
-                    raise
-                else:
-                    pass
-
-            retries = retries - pause_interval
-            time.sleep(pause_interval)
-        raise exceptions.ElementNotVisibleException(
-            "Element %s not visible despite waiting for %s seconds" % (
-                selector, timeout_seconds)
-        )
-
-    def wait_for_invisibility(self, selector, timeout_seconds=20):
-        """Waits for an element to not be displayed or not exist
-
-        Raises an InvalidElementStateException if the element does not become
-        invisible or exists after the timeout.
-        """
-        pause_interval = 1
-        retries = timeout_seconds / pause_interval
-        while retries:
-            try:
-                element = self.get_via_css(selector)
-                if not element.is_displayed():
-                    return element
-            except (exceptions.NoSuchElementException,
-                    exceptions.StaleElementReferenceException):
-                return None
-
-            retries = retries - pause_interval
-            time.sleep(pause_interval)
-        raise exceptions.InvalidElementStateException(
-            "Element %s is visible despite waiting for %s seconds" % (
-                selector, timeout_seconds)
-        )
-
-    def click_button_with_text(self, text):
-        """Find buttons on the page and click the first one with the text"""
-        for button in self.get_all_via_css("button"):
-            if button.text == text and button.is_displayed():
-                button.click()
-                return
-        raise AssertionError(
-            "Could not find a button with the text '%s'" % (text,)
-        )
+        self._update_element()
