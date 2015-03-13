@@ -252,8 +252,12 @@ class BaseComponent(object):
 
     @property
     def text(self):
-        self._update_element()
-        return self._element.text
+        try:
+            return self._element.text
+        except exceptions.StaleElementReferenceException:
+            self._update_element()
+            return self._element.text
+
 
     def _update_element(self):
         self._element = self.get_element(self.selector, driver=self._driver)

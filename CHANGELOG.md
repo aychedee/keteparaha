@@ -1,3 +1,9 @@
+0.0.10 2015-03-13
+-----------------
+
+Bugfix - All components in a list of components had the text of the first
+component...
+
 0.0.9 2015-03-12
 ----------------
 
