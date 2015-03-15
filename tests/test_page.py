@@ -23,7 +23,7 @@ class Modal(Component):
 class MockDriver(object):
 
     def __init__(self):
-        self.current_url = None
+        self.current_url = ''
 
     def find_element_by_css_selector(self, selector):
         return Mock()
