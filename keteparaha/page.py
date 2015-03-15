@@ -68,13 +68,18 @@ class SeleniumWrapper(object):
         """
         ComponentClass = self._get_component_class(component_or_selector)
 
+        components = []
         try:
-            return [
-                ComponentClass(self, el)
-                    for el in self.get_elements(ComponentClass.selector)
-            ]
+            elements = self.get_elements(ComponentClass.selector)
         except TimeoutException:
-            return []
+            return components
+
+        for idx, element in enumerate(elements, 1):
+            individualClass = self._get_component_class(
+                    '{}:nth-child({})'.format(component_or_selector, idx))
+            components.append(individualClass(self, element))
+
+        return components
 
     def _wait_for_condition(self, condition, message='', driver=None):
         """Wait until the expected condition is true and return the result"""

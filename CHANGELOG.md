@@ -1,8 +1,12 @@
 0.0.10 2015-03-13
 -----------------
 
-Bugfix - All components in a list of components had the text of the first
-component...
+Added
+=====
+
+- Bugfix, components returned by get_components are assigned unique selectors
+  using nth-child. This is going to fail if the original selector is not
+  specific enough.
 
 0.0.9 2015-03-12
 ----------------

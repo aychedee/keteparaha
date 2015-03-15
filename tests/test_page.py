@@ -34,6 +34,9 @@ class MockDriver(object):
     def find_element(self, *args):
         return self
 
+    def find_elements(self, *args):
+        return [i for i in range(10)]
+
     def click(self):
         pass
 
@@ -84,3 +87,10 @@ class ComponentTest(TestCase):
         modal = home.get_component('#modal-id2')
 
         assert isinstance(modal, Component)
+
+    def test_get_components_gives_unique_selector_to_each_component(self):
+        home = HomePage(MockTestCase('do_nothing'), driver=MockDriver())
+        rows = home.get_components('tr')
+
+        for idx, row in enumerate(rows, 1):
+            self.assertEqual(row.selector, 'tr:nth-child({})'.format(idx))
