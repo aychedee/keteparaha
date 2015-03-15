@@ -94,3 +94,11 @@ class ComponentTest(TestCase):
 
         for idx, row in enumerate(rows, 1):
             self.assertEqual(row.selector, 'tr:nth-child({})'.format(idx))
+
+
+    def test_repr_of_dynamic_components(self):
+        home = HomePage(MockTestCase('do_nothing'), driver=MockDriver())
+        rows = home.get_components('tr')
+
+        self.assertEqual(
+            str(rows[0]), 'DynamicComponent(selector="tr:nth-child(1)")')

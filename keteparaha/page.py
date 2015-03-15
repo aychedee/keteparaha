@@ -59,7 +59,8 @@ class SeleniumWrapper(object):
             return ComponentClass(self)
         except TimeoutException:
             raise self.ComponentMissing(
-                '{} could not be found in page'.format(ComponentClass))
+                '"{}" could not be found in page'.format(
+                    ComponentClass.selector))
 
     def get_components(self, component_or_selector):
         """Return an list of initialised components present in page
