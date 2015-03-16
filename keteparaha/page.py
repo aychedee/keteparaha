@@ -16,6 +16,19 @@ from selenium.webdriver.support.wait import TimeoutException, WebDriverWait
 ELEMENT_TIMEOUT = 10
 
 
+class text_to_be_present_in_component(object):
+    """ An expectation for checking if the given text is present in the
+    provided component.
+    locator, text
+    """
+    def __init__(self, component, text_):
+        self.component = component
+        self.text = text_
+
+    def __call__(self, driver):
+        return self.text in self.component._element.text
+
+
 class SeleniumWrapper(object):
 
     TimeoutException = TimeoutException
@@ -78,7 +91,7 @@ class SeleniumWrapper(object):
         for idx, element in enumerate(elements, 1):
             individualClass = self._get_component_class(
                     '{}:nth-child({})'.format(component_or_selector, idx))
-            components.append(individualClass(self, element))
+            components.append(individualClass(self))
 
         return components
 
@@ -86,13 +99,22 @@ class SeleniumWrapper(object):
         """Wait until the expected condition is true and return the result"""
         if not driver:
             driver = self._element
-        return WebDriverWait(driver, ELEMENT_TIMEOUT).until(condition, message)
+        return WebDriverWait(
+            driver, ELEMENT_TIMEOUT).until(condition, message)
 
     def get_element(self, selector, driver=None):
         """Get the DOM element identified by the css selector"""
         return self._wait_for_condition(
             ec.presence_of_element_located((By.CSS_SELECTOR, selector)),
             message='No element found with selector "{}".'.format(selector),
+            driver=driver
+        )
+
+    def get_clickable_element(self, selector, driver=None):
+        return self._wait_for_condition(
+            ec.element_to_be_clickable((By.CSS_SELECTOR, selector)),
+            message='No clickable element found with selector "{}".'.format(
+                selector),
             driver=driver
         )
 
@@ -131,12 +153,11 @@ class SeleniumWrapper(object):
         )
 
     def has_text(self, text):
-        self._update_element()
-        if isinstance(self, Page):
-            selector = 'body'
-        else:
-            selector = self.selector
-        return self.text_in_element(selector, text)
+        return self._wait_for_condition(
+            text_to_be_present_in_component(self, text),
+            message=u'"{}" not found in "{}".'.format(
+                text, self._element.text)
+        )
 
     def assert_element_invisible(self, selector):
         return self._wait_for_condition(
@@ -167,7 +188,16 @@ class SeleniumWrapper(object):
         selenium WebElement.
 
         """
-        return self._click(self._ensure_element(selector), opens)
+        print 'in click, selector is: ', selector, type(selector), selector.__class__
+        if isinstance(selector, basestring):
+            element = self.get_clickable_element(selector)
+        elif isinstance(selector, Component):
+            element = self.get_clickable_element(selector.selector)
+        else:
+            # We hit this case when we want to click on the parent component
+            element = self.get_clickable_element(
+                self.selector, driver=self._parent._driver)
+        return self._click(element, opens)
 
     def click_link(self, link_text, opens=None):
         return self._click(self.get_element_by_link_text(link_text), opens)
@@ -237,6 +267,32 @@ class SeleniumWrapper(object):
         raise AssertionError("Unable to correctly type {}".format(text))
 
 
+class WebElementProxy(object):
+    """A proxy to the Selenium WebElement identified by obj's selector"""
+    def __init__(self):
+        self.selector = 'html'
+
+    def __get__(self, obj, type=None):
+        selector = obj.selector if hasattr(obj, 'selector') else self.selector
+        try:
+            return obj._driver.find_element_by_css_selector(selector)
+        except exceptions.NoSuchElementException:
+            return WebDriverWait(obj._driver, ELEMENT_TIMEOUT).until(
+                ec.presence_of_element_located(
+                    (
+                        By.CSS_SELECTOR,
+                        selector
+                    )
+                ),
+                'Could not find "{}", despite waiting {} seconds'.format(
+                    selector, ELEMENT_TIMEOUT
+                )
+            )
+
+    def __set__(self, obj, value):
+        raise AttributeError()
+
+
 class RegisterMeta(type):
 
     def __init__(cls, name, bases, dct):
@@ -253,20 +309,11 @@ class Registry(object):
 
 
 class BaseComponent(object):
-
-    _element = None
+    _element = WebElementProxy()
 
     @property
     def text(self):
-        try:
-            return self._element.text
-        except exceptions.StaleElementReferenceException:
-            self._update_element()
-            return self._element.text
-
-
-    def _update_element(self):
-        self._element = self.get_element(self.selector, driver=self._driver)
+        return self._element.text
 
 
 class Component(BaseComponent, SeleniumWrapper, Registry):
@@ -277,14 +324,10 @@ class Component(BaseComponent, SeleniumWrapper, Registry):
         return '{}(selector="{}")'.format(
             self.__class__.__name__, self.selector)
 
-    def __init__(self, parent, element=None):
+    def __init__(self, parent):
         self.tc = parent.tc
         self._parent = parent
         self._driver = parent._driver
-        if element:
-            self._element = element
-        else:
-            self._update_element()
 
     @property
     def url(self):
@@ -307,15 +350,15 @@ class Page(BaseComponent, SeleniumWrapper, Registry):
             return self.click("input[type=submit]")
     """
     __metaclass__ = RegisterMeta
+
     url = None
 
     def __init__(self, tc, driver=None):
-        self.selector = 'html'
         self.tc = tc
+        self.selector = 'html'
         if driver:
             self._driver = driver
         else:
             self._driver = tc._driver
         if self.location() != self.url:
             self._driver.get(self.url)
-        self._update_element()

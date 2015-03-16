@@ -2,6 +2,8 @@
 
 ## [unreleased] [unreleased]
 ### Changed
+- Improved proxying to underlying web element, removes some sync related bugs
+- Adds our own text in element expectation
 
 ## [0.0.12] [2015-03-15]
 ### Changed
