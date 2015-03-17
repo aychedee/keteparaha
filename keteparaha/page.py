@@ -4,16 +4,65 @@ Page classes collect the logic for how to use a certain part of the web site
 under test into one area.
 
 """
+import collections
 from inspect import isclass
 import time
 from selenium.common import exceptions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import TimeoutException, WebDriverWait
 
 ELEMENT_TIMEOUT = 10
+
+__all__ = ['Component', 'Page']
+
+
+class _Registry(collections.MutableMapping):
+    """A singleton registry for pages and components"""
+    store = dict()
+
+    def __delitem__(self, key):
+        pass
+
+    def __getitem__(self, key):
+        return self.store[key]
+
+    def __iter__(self):
+        for value in self.store.values():
+            yield value
+
+    def __setitem__(self, key, value):
+        self.store[key] = value
+
+    def __len__(self):
+        return len(self.store)
+
+    def make_class(self, selector):
+        return type('DynamicComponent', (Component,), {'selector': selector})
+
+
+class _RegistryMeta(type):
+    """Add our pages and components to a central registry"""
+
+    def __init__(cls, name, bases, dct):
+        cls._registry = _Registry()
+        if dct.get('url'):
+            cls._registry[dct.get('url')] = cls
+        elif dct.get('selector'):
+            cls._registry[dct.get('selector')] = cls
+
+        return super(_RegistryMeta, cls).__init__(name, bases, dct)
+
+
+def _wait_for_condition(condition, component, message='', driver=None):
+    """Wait until the expected condition is true and return the result"""
+    if not driver:
+        driver = component._element
+    return WebDriverWait(
+        driver, ELEMENT_TIMEOUT).until(condition, message)
 
 
 class text_to_be_present_in_component(object):
@@ -29,7 +78,7 @@ class text_to_be_present_in_component(object):
         return self.text in self.component._element.text
 
 
-class SeleniumWrapper(object):
+class _SeleniumWrapper(object):
 
     TimeoutException = TimeoutException
 
@@ -172,11 +221,10 @@ class SeleniumWrapper(object):
         """
         element.click()
         if opens:
-            return self._get_component_class(opens)(self)
+            return self._get_component_class(opens)(self, driver=self._driver)
 
         if self.url != self.location() and self.location() in self._registry:
-            return self._registry[self.location()](
-                self.tc, driver=self._driver)
+            return self._registry[self.location()](driver=self._driver)
         return self
 
     def click(self, selector=None, opens=None):
@@ -188,7 +236,6 @@ class SeleniumWrapper(object):
         selenium WebElement.
 
         """
-        print 'in click, selector is: ', selector, type(selector), selector.__class__
         if isinstance(selector, basestring):
             element = self.get_clickable_element(selector)
         elif isinstance(selector, Component):
@@ -267,7 +314,7 @@ class SeleniumWrapper(object):
         raise AssertionError("Unable to correctly type {}".format(text))
 
 
-class WebElementProxy(object):
+class _WebElementProxy(object):
     """A proxy to the Selenium WebElement identified by obj's selector"""
     def __init__(self):
         self.selector = 'html'
@@ -293,39 +340,23 @@ class WebElementProxy(object):
         raise AttributeError()
 
 
-class RegisterMeta(type):
-
-    def __init__(cls, name, bases, dct):
-        if dct.get('url'):
-            cls._registry[dct.get('url')] = cls
-        elif dct.get('selector'):
-            cls._registry[dct.get('selector')] = cls
-
-        return super(RegisterMeta, cls).__init__(name, bases, dct)
-
-
-class Registry(object):
-    _registry = dict()
-
-
-class BaseComponent(object):
-    _element = WebElementProxy()
+class _BaseComponent(object):
+    __metaclass__ = _RegistryMeta
+    _element = _WebElementProxy()
 
     @property
     def text(self):
         return self._element.text
 
 
-class Component(BaseComponent, SeleniumWrapper, Registry):
-    __metaclass__ = RegisterMeta
+class Component(_BaseComponent, _SeleniumWrapper):
     selector = None
 
     def __repr__(self):
         return '{}(selector="{}")'.format(
             self.__class__.__name__, self.selector)
 
-    def __init__(self, parent):
-        self.tc = parent.tc
+    def __init__(self, parent, driver=None):
         self._parent = parent
         self._driver = parent._driver
 
@@ -336,7 +367,7 @@ class Component(BaseComponent, SeleniumWrapper, Registry):
         return self._parent.url
 
 
-class Page(BaseComponent, SeleniumWrapper, Registry):
+class Page(_BaseComponent, _SeleniumWrapper):
     """Generic web page, intended to be subclassed
 
     Pages and Components are stored in a registry and switched to dynamically
@@ -349,16 +380,10 @@ class Page(BaseComponent, SeleniumWrapper, Registry):
             self.enter_text("input[name=password]", password)
             return self.click("input[type=submit]")
     """
-    __metaclass__ = RegisterMeta
-
     url = None
 
-    def __init__(self, tc, driver=None):
-        self.tc = tc
+    def __init__(self, driver=None):
         self.selector = 'html'
-        if driver:
-            self._driver = driver
-        else:
-            self._driver = tc._driver
+        self._driver = driver
         if self.location() != self.url:
             self._driver.get(self.url)
