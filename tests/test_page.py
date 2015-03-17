@@ -1,5 +1,6 @@
 from mock import Mock
 from unittest import TestCase
+from selenium.webdriver.remote.webdriver import WebDriver
 
 from keteparaha.page import Component, Page
 
@@ -21,14 +22,30 @@ class Modal(Component):
     def __repr__(self):
         return super(Modal, self).__repr__()
 
+class ModalNext(Component):
+    selector = '#modal-next'
 
-class MockDriver(object):
+    def __repr__(self):
+        return super(Modal, self).__repr__()
+
+
+class MockDriver(WebDriver):
+
+    current_url = ''
 
     def __init__(self):
         self.current_url = ''
 
     def find_element_by_css_selector(self, selector):
         return Mock()
+
+    def find_element_by_link_text(self, selector):
+        return Mock()
+
+    def find_elements_by_tag_name(self, selector):
+        return [
+            type('btn', (Mock,), {})(text=t)
+                for t in  ['yes', 'no', 'button text']]
 
     def get(self, url):
         self.current_url = url
@@ -74,19 +91,19 @@ class ComponentTest(TestCase):
         home = HomePage(driver=MockDriver())
         modal = home.get_component(Modal)
 
-        assert isinstance(modal, Component)
+        self.assertIsInstance(modal, Component)
 
     def test_get_component_with_passed_in_component_selector(self):
         home = HomePage(driver=MockDriver())
         modal = home.get_component('#modal-id')
 
-        assert isinstance(modal, Component)
+        self.assertIsInstance(modal, Component)
 
     def test_get_component_with_nonexistent_passed_in_component_selector(self):
         home = HomePage(driver=MockDriver())
         modal = home.get_component('#modal-id2')
 
-        assert isinstance(modal, Component)
+        self.assertIsInstance(modal, Component)
 
     def test_get_components_gives_unique_selector_to_each_component(self):
         home = HomePage(driver=MockDriver())
@@ -102,3 +119,35 @@ class ComponentTest(TestCase):
 
         self.assertEqual(
             str(rows[0]), 'DynamicComponent(selector="tr:nth-child(1)")')
+
+    def test_click_button(self):
+        home = HomePage(driver=MockDriver())
+        modal = home.get_component('#modal-id')
+
+        modal_next = modal.click_button('button text', opens='#modal-next')
+
+        self.assertIsInstance(modal_next, ModalNext)
+
+    def test_click_link(self):
+        home = HomePage(driver=MockDriver())
+        modal = home.get_component('#modal-id')
+
+        modal_next = modal.click_link('button text', opens='#modal-next')
+
+        self.assertIsInstance(modal_next, ModalNext)
+
+    def test_click_button_with_passed_in_class(self):
+        home = HomePage(driver=MockDriver())
+        modal = home.get_component('#modal-id')
+
+        modal_next = modal.click_button('button text', opens=ModalNext)
+
+        self.assertIsInstance(modal_next, ModalNext)
+
+    def test_click_with_passed_in_class(self):
+        home = HomePage(driver=MockDriver())
+        modal = home.get_component('#modal-id')
+
+        modal_next = modal.click('.btn', opens=ModalNext)
+
+        self.assertIsInstance(modal_next, ModalNext)
