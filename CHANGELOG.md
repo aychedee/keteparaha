@@ -1,9 +1,13 @@
 # Changelog
-
 ## [unreleased] [unreleased]
+### Changed
+-
+
+## [0.0.13] [2015-03-17]
 ### Changed
 - Improved proxying to underlying web element, removes some sync related bugs
 - Adds our own text in element expectation
+- the web element proxy can now get elements by link text or button text
 
 ## [0.0.12] [2015-03-15]
 ### Changed
