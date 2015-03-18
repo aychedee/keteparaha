@@ -349,7 +349,7 @@ class _WebElementProxy(object):
                             selector
                         )
                     ),
-                    'Could not find "{}", despite waiting {} seconds'.format(
+                    'No element "{}", waited {} seconds'.format(
                         selector, ELEMENT_TIMEOUT
                     )
                 )
@@ -363,7 +363,20 @@ class _WebElementProxy(object):
             )
 
         elif obj._find_by == 'link_text':
-            return obj._driver.find_element_by_link_text(selector)
+            try:
+                return obj._driver.find_element_by_link_text(selector)
+            except exceptions.NoSuchElementException:
+                return WebDriverWait(obj._driver, ELEMENT_TIMEOUT).until(
+                    ec.presence_of_element_located(
+                        (
+                            By.LINK_TEXT,
+                            selector
+                        )
+                    ),
+                    'No link with text "{}", waited {} seconds'.format(
+                        selector, ELEMENT_TIMEOUT
+                    )
+                )
 
         elif obj._find_by == 'index_position':
             idx = obj._index_position

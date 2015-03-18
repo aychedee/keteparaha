@@ -2,6 +2,11 @@
 ## [unreleased] [unreleased]
 ### Changed
 -
+
+## [0.0.16] [2015-03-18]
+### Changed
+-
+
 ## [0.0.15] [2015-03-18]
 ### Changed
 - Technique for getting components underlying element improved when the
