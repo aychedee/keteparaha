@@ -22,6 +22,11 @@ class Modal(Component):
     def __repr__(self):
         return super(Modal, self).__repr__()
 
+    @property
+    def _element(self):
+        return MockDriver()
+
+
 class ModalNext(Component):
     selector = '#modal-next'
 
@@ -36,6 +41,10 @@ class MockDriver(WebDriver):
     def __init__(self):
         self.current_url = ''
 
+    @property
+    def _element(self):
+        return MockDriver()
+
     def find_element_by_css_selector(self, selector):
         return Mock()
 
@@ -44,7 +53,7 @@ class MockDriver(WebDriver):
 
     def find_elements_by_tag_name(self, selector):
         return [
-            type('btn', (Mock,), {})(text=t)
+            type('btn', (Mock,), {'_parent': MockDriver()})(text=t)
                 for t in  ['yes', 'no', 'button text']]
 
     def get(self, url):
@@ -109,16 +118,16 @@ class ComponentTest(TestCase):
         home = HomePage(driver=MockDriver())
         rows = home.get_components('tr')
 
-        for idx, row in enumerate(rows, 1):
-            self.assertEqual(row.selector, 'tr:nth-child({})'.format(idx))
-
+        for idx, row in enumerate(rows):
+            self.assertEqual(row._find_by, 'index_position')
+            self.assertEqual(row._index_position, idx)
 
     def test_repr_of_dynamic_components(self):
         home = HomePage(driver=MockDriver())
         rows = home.get_components('tr')
 
         self.assertEqual(
-            str(rows[0]), 'DynamicComponent(selector="tr:nth-child(1)")')
+            str(rows[0]), 'DynamicComponent(selector="tr")[0]')
 
     def test_click_button(self):
         home = HomePage(driver=MockDriver())

@@ -2,6 +2,11 @@
 ## [unreleased] [unreleased]
 ### Changed
 -
+## [0.0.15] [2015-03-18]
+### Changed
+- Technique for getting components underlying element improved when the
+  component is part of a list/group
+
 ## [0.0.14] [2015-03-18]
 ### Changed
 - Clickable components should be visible as well as enabled.

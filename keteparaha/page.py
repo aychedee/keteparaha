@@ -119,10 +119,11 @@ class _SeleniumWrapper(object):
         except TimeoutException:
             return components
 
-        for idx, element in enumerate(elements, 1):
-            individualClass = self._get_component_class(
-                    '{}:nth-child({})'.format(component_or_selector, idx))
-            components.append(individualClass(self))
+        for idx, element in enumerate(elements):
+            comp_inst = self._get_component_class(
+                component_or_selector)(self, find_by='index_position')
+            comp_inst._index_position = idx
+            components.append(comp_inst)
 
         return components
 
@@ -364,6 +365,10 @@ class _WebElementProxy(object):
         elif obj._find_by == 'link_text':
             return obj._driver.find_element_by_link_text(selector)
 
+        elif obj._find_by == 'index_position':
+            idx = obj._index_position
+            return obj._driver.find_elements_by_css_selector(selector)[idx]
+
         else:
             raise ValueError('Element proxy needs to know how to find element')
 
@@ -394,8 +399,11 @@ class Component(_BaseComponent, _SeleniumWrapper):
     _driver = WebDriverOnly()
 
     def __repr__(self):
-        return '{}(selector="{}")'.format(
+        output = '{}(selector="{}")'.format(
             self.__class__.__name__, self.selector)
+        if self._find_by == 'index_position':
+            output = output + '[{}]'.format(self._index_position)
+        return output
 
     def __init__(self, parent, driver=None, find_by='selector'):
         self._find_by = find_by
