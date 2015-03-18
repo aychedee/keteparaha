@@ -400,8 +400,10 @@ class Component(_BaseComponent, _SeleniumWrapper):
     def __init__(self, parent, driver=None, find_by='selector'):
         self._find_by = find_by
         self._parent = parent
-        self._driver = parent._driver
 
+    @property
+    def _driver(self):
+        return self._parent._element
 
     @property
     def page(self):

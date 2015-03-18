@@ -2,6 +2,10 @@
 ## [unreleased] [unreleased]
 ### Changed
 -
+## [0.0.14] [2015-03-18]
+### Changed
+- Clickable components should be visible as well as enabled.
+- Components only look inside their parents element for sub_elements
 
 ## [0.0.13] [2015-03-17]
 ### Changed
