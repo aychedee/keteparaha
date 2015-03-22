@@ -396,8 +396,32 @@ class _BaseComponent(object):
 
 
 class Component(_BaseComponent, _SeleniumWrapper):
+    """Generic page component, intended to be subclassed
+
+    Pages and Components are stored in a registry and switched to dynamically
+
+    class ShoppingBasket(Component):
+        selector = '#shopping-basket'
+
+        def remove_item(self, name):
+            contents = self.get_components('tr')
+            for item in contents:
+                if name in item.text:
+                    item.click('.remove')
+                    return
+            raise AssertionError('No item in basket called "{}"'.format(name))
+
+    page = Page(driver)
+    basket = page.click_link('Shopping Basket', opens=ShoppingBasket)
+    # The following would also work identically:
+    ## basket = page.click_link('Shopping Basket', opens='#shopping-basket')
+
+    basket.remove_item('Buzz Lightyear')
+
+    """
     __metaclass__ = _RegistryMeta
     _driver = WebDriverOnly()
+    selector = None
 
     def __repr__(self):
         output = '{}(selector="{}")'.format(
