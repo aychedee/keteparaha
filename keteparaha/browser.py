@@ -41,21 +41,22 @@ def snapshot_on_error(method):
     """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        SNAPSHOT_PATH = getattr(self, "SNAPSHOT_PATH", os.path.expanduser("~"))
-        if not os.path.exists(SNAPSHOT_PATH):
-            os.makedirs(SNAPSHOT_PATH)
+        """TestCase wrapper for snapshot_on_error"""
+        snapshot_path = getattr(self, "SNAPSHOT_PATH", os.path.expanduser("~"))
+        if not os.path.exists(snapshot_path):
+            os.makedirs(snapshot_path)
         try:
             method(self, *args, **kwargs)
-        except Exception as test_exception:
+        except BaseException as test_exception:
 
             test_traceback = sys.exc_info()[2]
-            for idx, browser in enumerate(self._browsers):
+            for idx, browser in enumerate(self.browsers):
                 try:
                     body = browser.find_element_by_tag_name('body')
                     body_height = body.size['height']
                     window_height = browser.get_window_size()['height']
                     pages = int(math.ceil(float(body_height) / window_height))
-                except:
+                except BaseException:
                     pages = 0
 
                 for i in range(pages):
@@ -63,7 +64,7 @@ def snapshot_on_error(method):
                         'window.scrollTo(0,%s)' % (i*window_height))
                     time.sleep(0.2)
                     browser.get_screenshot_as_file(
-                        SNAPSHOT_PATH + "/%s_browser-%s_page-%s.png" % (
+                        snapshot_path + "/%s_browser-%s_page-%s.png" % (
                             self.id(),
                             idx,
                             i
@@ -81,11 +82,15 @@ class BrowserTestCase(unittest.TestCase):
     functionally test a website
     """
 
+    def __init__(self, *args, **kwargs):
+        self.browsers = list()
+        self._driver = None
+        self._display = None
+        super(BrowserTestCase, self).__init__(*args, **kwargs)
+
     def start_browser(self, size=FRAME_SIZE, driver="Firefox"):
         """Start and return a Selenium Webdriver browser instance
         """
-        if not hasattr(self, "_browsers"):
-            self._browsers = list()
         try:
             driver = getattr(webdriver, driver)
         except AttributeError:
@@ -103,7 +108,7 @@ class BrowserTestCase(unittest.TestCase):
 
         self._driver = driver()
         self._driver.set_window_size(*size)
-        self._browsers.append(self._driver)
+        self.browsers.append(self._driver)
         self.addCleanup(self._driver.close)
         return self._driver
 
@@ -111,7 +116,7 @@ class BrowserTestCase(unittest.TestCase):
     def browser(self):
         """Returns the last browser started"""
         try:
-            return self._browsers[-1]
+            return self.browsers[-1]
         except (IndexError, AttributeError):
             raise AttributeError(
                 "You need to start a browser before you access it")

@@ -1,7 +1,34 @@
-"""Page class, intended to be sub classed as an abstraction for a real web page
+# -*- coding: utf-8 -*-
+"""Page and page Component classes
 
-Page classes collect the logic for how to use a certain part of the web site
-under test into one area.
+The keteparaha Page and Component classes represent web pages and components
+of web pages.
+
+Pages are identified by the URL of the browser, and components by the CSS
+selector that is used to retrieve them.
+
+If you perform an action that causes the browser to visit a new URL, and
+you have defined a Page class with that URL, then the new page will
+automatically be returned from that action.
+
+Creating an instance of a page object will automatically cause the browser to
+visit that page as well.
+
+Example:
+    BASE_URL = 'http://my-site.com'
+
+    class Home(Page):
+        url = BASE_URL + '/'
+
+    class Dashboard(Page):
+        url = BASE_URL + '/dashboard/'
+
+    class
+
+    home = Home(driver)  # driver is a WebDriver instance, browser would
+                         # automatically visit the home page at this point
+
+    dashboard = home.click_link('Dashboard')
 
 """
 import collections
@@ -21,6 +48,9 @@ from .expectations import (
 )
 
 ELEMENT_TIMEOUT = 10
+""" (int): The seconds that a component will wait to be visible, clickable, or
+    present before raising a TimeoutException
+"""
 
 __all__ = ['Component', 'Page']
 
@@ -51,9 +81,6 @@ class _Registry(collections.MutableMapping):
         except KeyError:
             return self.make_class(selector)
 
-    def make_class(self, selector):
-        return type('DynamicComponent', (Component,), {'selector': selector})
-
 
 class _RegistryMeta(type):
     """Add our pages and components to a central registry"""
@@ -69,9 +96,10 @@ class _RegistryMeta(type):
 
 
 class _SeleniumWrapper(object):
+    """Mixin for page and component class that understands the WebDriver API
+    """
 
     TimeoutException = TimeoutException
-
 
     class ComponentMissing(Exception):
         pass
@@ -136,7 +164,8 @@ class _SeleniumWrapper(object):
         )
 
     def get_clickable_element(self, selector, driver=None):
-        return _wait_for_condition(
+        """Return an element that can be clicked, or raise an error"""
+        return self._wait_for_condition(
             ec.element_to_be_clickable((By.CSS_SELECTOR, selector)),
             self,
             message='No clickable element found with selector "{}".'.format(
@@ -145,7 +174,8 @@ class _SeleniumWrapper(object):
         )
 
     def get_visible_element(self, selector):
-        return _wait_for_condition(
+        """Return an element that is visible, or raise an error"""
+        return self._wait_for_condition(
             ec.visibility_of_element_located((By.CSS_SELECTOR, selector)),
             self,
             message='No visible element found with selector "{}".'.format(
@@ -168,13 +198,18 @@ class _SeleniumWrapper(object):
         )
 
     def get_attribute(self, attribute):
+        """Return the value of an attribute of the component"""
         return self._element.get_attribute(attribute)
 
     def wait_for_invisibility(self, selector):
-        return self.assert_element_invisible(selector)
+        """Pause until the element identified by selector is invisible"""
+        return self._wait_for_condition(
+            ec.invisibility_of_element_located((By.CSS_SELECTOR, selector))
+        )
 
     def text_in_element(self, selector, text):
-        return _wait_for_condition(
+        """Return whether the text is in the element identified by selector"""
+        return self._wait_for_condition(
             ec.text_to_be_present_in_element(
                 (By.CSS_SELECTOR, selector), text),
             self,
@@ -183,17 +218,12 @@ class _SeleniumWrapper(object):
         )
 
     def has_text(self, text):
-        return _wait_for_condition(
+        """Return whether the text is in the component"""
+        return self._wait_for_condition(
             text_to_be_present_in_component(self, text),
             self,
             message=u'"{}" not found in "{}".'.format(
                 text, self._element.text)
-        )
-
-    def assert_element_invisible(self, selector):
-        return _wait_for_condition(
-            ec.invisibility_of_element_located((By.CSS_SELECTOR, selector)),
-            self
         )
 
     def _click(self, component, opens=None):
@@ -255,9 +285,8 @@ class _SeleniumWrapper(object):
                 selector))
 
     def click_link(self, link_text, opens=None):
-        component = Component(self, find_by='link_text')
-        component.selector = link_text
-        return self._click(component, opens)
+        """Click a link in the component with link_text"""
+        return self._click(self.get_element_by_link_text(link_text), opens)
 
     def click_button(self, button_text, opens=None):
         """Find buttons on the page and click the first one with the text"""
@@ -269,12 +298,15 @@ class _SeleniumWrapper(object):
         )
 
     def location(self):
-        return self.page._driver.current_url.split('?')[0]
+        """The current page location without any query parameters"""
+        return self._driver.current_url.split('?')[0]
 
     def select_option(self, selector, option_text):
+        """Select option in dropdown identified by selector with given text"""
         Select(self.get_element(selector)).select_by_visible_text(option_text)
 
     def clear(self, selector):
+        """Clear text out of input identified by CSS selector"""
         try:
             self.get_visible_element(selector).clear()
         except (exceptions.InvalidElementStateException,
@@ -283,6 +315,7 @@ class _SeleniumWrapper(object):
                 'You cannot clear that element')
 
     def hover(self, selector, opens=None):
+        """Hover over element identified by CSS selector"""
         ActionChains(self._driver).move_to_element(
             self.get_element(selector)).perform()
         if opens:
@@ -392,6 +425,7 @@ class _BaseComponent(object):
 
     @property
     def text(self):
+        """The visible text of the component"""
         return self._element.text
 
 
@@ -432,7 +466,6 @@ class Component(_BaseComponent, _SeleniumWrapper):
 
     def __init__(self, parent, driver=None, find_by='selector'):
         self._find_by = find_by
-        self._parent = parent
 
     @property
     def _driver(self):
@@ -446,6 +479,7 @@ class Component(_BaseComponent, _SeleniumWrapper):
 
     @property
     def url(self):
+        """The url of the page which the component is inside"""
         return self.page.url
 
 

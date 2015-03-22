@@ -14,3 +14,14 @@
 """
 
 __version__ = '0.0.16'
+from .email_client import GmailImapClient
+from .page import Component, Page
+from .browser import (
+    BrowserTestCase,
+    HeadlessBrowserTestCase,
+    snapshot_on_error
+)
+from .flow import ignore, retry
+
+__version__ = '0.0.12'
+__all__ = ['BrowserTestCase', 'Component', 'Page']
