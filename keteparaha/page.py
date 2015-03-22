@@ -10,7 +10,6 @@ import time
 from selenium.common import exceptions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import TimeoutException, WebDriverWait
@@ -262,23 +261,12 @@ class _SeleniumWrapper(object):
 
     def click_button(self, button_text, opens=None):
         """Find buttons on the page and click the first one with the text"""
-        component = Component(self, find_by='button_text')
-        component.selector = button_text
-        return self._click(component, opens)
-
-    def scroll_into_view(self):
-        # Accessing this property on an element scrolls it into view
-        self._element.location_once_scrolled_into_view
-
-    def _ensure_element(self, selector_or_element):
-        if isinstance(selector_or_element, basestring):
-            return self.get_element(selector_or_element)
-        if isinstance(selector_or_element, Component):
-            return self.get_element(selector_or_element.selector)
-        if selector_or_element is None:
-            # We hit this case when we want to click on the parent component
-            return self._element
-        return selector_or_element
+        for button in self._element.find_elements_by_tag_name("button"):
+            if button.text == button_text and button.is_displayed():
+                return self._click(button, opens)
+        raise AssertionError(
+            "Could not find a button with the text '%s'" % (button_text,)
+        )
 
     def location(self):
         return self.page._driver.current_url.split('?')[0]
