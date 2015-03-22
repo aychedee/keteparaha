@@ -45,6 +45,12 @@ class MockDriver(WebDriver):
     def _element(self):
         return MockDriver()
 
+    def is_enabled(self):
+        return True
+
+    def is_displayed(self):
+        return True
+
     def find_element_by_css_selector(self, selector):
         return Mock()
 

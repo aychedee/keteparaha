@@ -37,6 +37,7 @@ import time
 from selenium.common import exceptions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import TimeoutException, WebDriverWait
@@ -80,6 +81,9 @@ class _Registry(collections.MutableMapping):
             return self.store[selector]
         except KeyError:
             return self.make_class(selector)
+
+    def make_class(self, selector):
+        return type('DynamicComponent', (Component,), {'selector': selector})
 
 
 class _RegistryMeta(type):
@@ -165,7 +169,7 @@ class _SeleniumWrapper(object):
 
     def get_clickable_element(self, selector, driver=None):
         """Return an element that can be clicked, or raise an error"""
-        return self._wait_for_condition(
+        return _wait_for_condition(
             ec.element_to_be_clickable((By.CSS_SELECTOR, selector)),
             self,
             message='No clickable element found with selector "{}".'.format(
@@ -175,7 +179,7 @@ class _SeleniumWrapper(object):
 
     def get_visible_element(self, selector):
         """Return an element that is visible, or raise an error"""
-        return self._wait_for_condition(
+        return _wait_for_condition(
             ec.visibility_of_element_located((By.CSS_SELECTOR, selector)),
             self,
             message='No visible element found with selector "{}".'.format(
@@ -203,13 +207,14 @@ class _SeleniumWrapper(object):
 
     def wait_for_invisibility(self, selector):
         """Pause until the element identified by selector is invisible"""
-        return self._wait_for_condition(
-            ec.invisibility_of_element_located((By.CSS_SELECTOR, selector))
+        return _wait_for_condition(
+            ec.invisibility_of_element_located((By.CSS_SELECTOR, selector)),
+            self
         )
 
     def text_in_element(self, selector, text):
         """Return whether the text is in the element identified by selector"""
-        return self._wait_for_condition(
+        return _wait_for_condition(
             ec.text_to_be_present_in_element(
                 (By.CSS_SELECTOR, selector), text),
             self,
@@ -219,7 +224,7 @@ class _SeleniumWrapper(object):
 
     def has_text(self, text):
         """Return whether the text is in the component"""
-        return self._wait_for_condition(
+        return _wait_for_condition(
             text_to_be_present_in_component(self, text),
             self,
             message=u'"{}" not found in "{}".'.format(
@@ -285,25 +290,27 @@ class _SeleniumWrapper(object):
                 selector))
 
     def click_link(self, link_text, opens=None):
-        """Click a link in the component with link_text"""
-        return self._click(self.get_element_by_link_text(link_text), opens)
+        component = Component(self, find_by='link_text')
+        component.selector = link_text
+        return self._click(component, opens)
 
     def click_button(self, button_text, opens=None):
         """Find buttons on the page and click the first one with the text"""
-        for button in self._element.find_elements_by_tag_name("button"):
-            if button.text == button_text and button.is_displayed():
-                return self._click(button, opens)
-        raise AssertionError(
-            "Could not find a button with the text '%s'" % (button_text,)
-        )
+        component = Component(self, find_by='button_text')
+        component.selector = button_text
+        return self._click(component, opens)
 
     def location(self):
         """The current page location without any query parameters"""
-        return self._driver.current_url.split('?')[0]
+        return self.page._driver.current_url.split('?')[0]
 
     def select_option(self, selector, option_text):
         """Select option in dropdown identified by selector with given text"""
         Select(self.get_element(selector)).select_by_visible_text(option_text)
+
+    def scroll_into_view(self):
+        """Scroll the window until the component is visible"""
+        self._element.location_once_scrolled_into_view
 
     def clear(self, selector):
         """Clear text out of input identified by CSS selector"""
@@ -354,9 +361,6 @@ class _WebElementProxy(object):
         self.selector = 'html'
 
     def __get__(self, obj, owner):
-        if obj is None:
-            # Geting called as a class method
-            raise RuntimeError('Components need to be initialised before use')
         selector = obj.selector if hasattr(obj, 'selector') else self.selector
 
         if obj._find_by == 'selector':
@@ -465,6 +469,7 @@ class Component(_BaseComponent, _SeleniumWrapper):
         return output
 
     def __init__(self, parent, driver=None, find_by='selector'):
+        self._parent = parent
         self._find_by = find_by
 
     @property
