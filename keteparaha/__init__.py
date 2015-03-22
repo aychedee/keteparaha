@@ -9,9 +9,19 @@ ignoring certain errors.
 Installation
 ------------
 
-Keteparaha is available on PyPi. To install the latest release simply use:
+Keteparaha is available on PyPi. To install the latest release simply run:
 
     pip install keteparaha
+
+Usage
+-----
+
+**BrowserTestCase** is a sub classed unittest.TestCase designed to make
+working with Selenium Webdriver simpler. It can operate in headless mode to be
+used with continuous integration.
+
+**Page** and **Component** represent a web app's pages, or the components
+that can be found on those pages.
 
 License
 -------
