@@ -251,13 +251,15 @@
     </p>
   % endif
 
-  <header id="section-intro">
+<section>
+
+  <div id="section-intro">
   <h1 class="title"><span class="name">${module.name}</span> module</h1>
   ${module.docstring | mark}
   ${show_source(module)}
-  </header>
+  </div>
 
-  <section id="section-items">
+  <div id="section-items">
     % if len(variables) > 0:
     <h2 class="section-title" id="header-variables">Module variables</h2>
     % for v in variables:
@@ -344,7 +346,10 @@
       </div>
     % endfor
     % endif
-  </section>
+  </div>
+
+</section>
+
 </%def>
 
 <%def name="module_index(module)">
@@ -365,50 +370,6 @@
         </ul>
 
         <p class="header">This project is maintained by <a class="header name" href="https://github.com/aychedee">aychedee</a></p>
-
-
-            <h1>Index</h1>
-            <ul id="index">
-            % if len(variables) > 0:
-            <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
-              ${show_column_list(map(lambda v: link(v.refname), variables))}
-            </li>
-            % endif
-
-            % if len(functions) > 0:
-            <li class="set"><h3><a href="#header-functions">Functions</a></h3>
-              ${show_column_list(map(lambda f: link(f.refname), functions))}
-            </li>
-            % endif
-
-            % if len(classes) > 0:
-            <li class="set"><h3><a href="#header-classes">Classes</a></h3>
-              <ul>
-              % for c in classes:
-                <li class="mono">
-                <span class="class_name">${link(c.refname)}</span>
-                <%
-                  methods = c.functions() + c.methods()
-                %>
-                % if len(methods) > 0:
-                  ${show_column_list(map(lambda f: link(f.refname), methods))}
-                % endif
-                </li>
-              % endfor
-              </ul>
-            </li>
-            % endif
-
-            % if len(submodules) > 0:
-            <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
-              <ul>
-              % for m in submodules:
-                <li class="mono">${link(m.refname)}</li>
-              % endfor
-              </ul>
-            </li>
-            % endif
-            </ul>
       </header>
 </%def>
 
@@ -420,8 +381,6 @@
   <meta http-equiv="X-UA-Compatible" content="chrome=1">
   <title>Keteparaha by aychedee</title>
 
-  <link rel="stylesheet" href="stylesheets/styles.css">
-  <link rel="stylesheet" href="stylesheets/pygment_trac.css">
   <script src="javascripts/scale.fix.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <!--[if lt IE 9]>
@@ -429,14 +388,6 @@
   <![endif]-->
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
-  <%namespace name="css" file="css.mako" />
-  <style type="text/css">
-  ${css.pre()}
-  </style>
-
-  <style type="text/css">
-  ${css.pdoc()}
-  </style>
 
   % if use_pygments:
   <style type="text/css">
@@ -444,9 +395,8 @@
   </style>
   % endif
 
-  <style type="text/css">
-  ${css.post()}
-  </style>
+  <link rel="stylesheet" href="stylesheets/styles.css">
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css">
 
   <script type="text/javascript">
   function toggle(id, $link) {
@@ -464,24 +414,16 @@
   </script>
 </head>
 <body>
-<a href="#" id="top">Top</a>
-
-<div id="container">
-  % if module_list:
-    <article id="content">
-      ${show_module_list(modules)}
-    </article>
-  % else:
-    ${module_index(module)}
-    <article id="content">
-      ${show_module(module)}
-    </article>
-  % endif
-  <div class="clear"> </div>
-
-      <footer>
-        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
-      </footer>
+    <div class="wrapper">
+        % if module_list:
+              ${show_module_list(modules)}
+        % else:
+            ${module_index(module)}
+              ${show_module(module)}
+        % endif
+        <footer>
+            <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+        </footer>
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
 

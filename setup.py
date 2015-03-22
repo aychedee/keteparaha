@@ -8,6 +8,35 @@ except ImportError:
 
 module = __import__('keteparaha')
 
+FILTERED_METHODS = [
+    'addCleanup',
+    'addTypeEquality',
+    'addTypeEqualityFunc',
+    'countTestCases',
+    'debug',
+    'defaultTestResult',
+    'doCleanups',
+    'id',
+    'setUp',
+    'setUpClass',
+    'tearDownClass',
+    'skipTest',
+    'maxDiff',
+    'longMessage',
+    'tearDown',
+    'shortDescription',
+]
+
+def doc_filter(doc):
+    if (
+        doc.name.startswith('assert') or
+        doc.name.startswith('fail') or
+        doc.name in FILTERED_METHODS
+    ):
+        return False
+    print doc.name
+    return True
+
 
 if sys.argv[1] == 'document':
     # Automatically update the documentation
@@ -16,7 +45,7 @@ if sys.argv[1] == 'document':
     template_dir = path.join(doc_dir, 'templates')
     pdoc.tpl_lookup = pdoc.TemplateLookup(directories=[template_dir])
     pdoc._template_path = [template_dir]
-    docs = pdoc.html('keteparaha', external_links=True, source=False)
+    docs = pdoc.html('keteparaha', docfilter=doc_filter, external_links=True, source=False)
     with open(path.join(doc_dir, 'index.html'), 'w') as f:
         f.write(docs)
     sys.exit(0)
