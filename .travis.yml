@@ -7,6 +7,6 @@ python:
   - "3.4"
   - "nightly"
 # command to install dependencies
-install: "pip install ."
+install: "pip install -q -e ."
 # command to run tests
 script: nosetests
