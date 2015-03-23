@@ -1,0 +1,1033 @@
+<!doctype html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <title>Keteparaha by aychedee</title>
+
+  <script src="javascripts/scale.fix.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <!--[if lt IE 9]>
+  <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
+
+
+  <link rel="stylesheet" href="stylesheets/styles.css">
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+
+  <script type="text/javascript">
+  function toggle(id, $link) {
+    $node = document.getElementById(id);
+    if (!$node)
+    return;
+    if (!$node.style.display || $node.style.display == 'none') {
+    $node.style.display = 'block';
+    $link.innerHTML = 'Hide source &nequiv;';
+    } else {
+    $node.style.display = 'none';
+    $link.innerHTML = 'Show source &equiv;';
+    }
+  }
+  </script>
+</head>
+<body>
+    <div class="wrapper">
+
+
+      <header>
+        <h1 class="header">Keteparaha</h1>
+        <p class="header">Collection of test helpers, specifically for Selenium Webdriver functional tests</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/aychedee/keteparaha/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/aychedee/keteparaha/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/aychedee/keteparaha">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/aychedee">aychedee</a></p>
+      </header>
+
+
+
+
+
+
+
+<section>
+
+  <div id="section-intro">
+  <h1 class="title"><span class="name">keteparaha</span> module</h1>
+  <p>A collection of tools to help when functional testing</p>
+<p>It contains utilities that assist with tasks like running a browser in a
+headless environment, or checking that emails have been sent, or a file has
+been uploaded to a server, or common testing flow control like retrying or
+ignoring certain errors.</p>
+<h2>Installation</h2>
+<p>Keteparaha is available on PyPi. To install the latest release simply run:</p>
+<pre><code>pip install keteparaha
+</code></pre>
+<h2>Usage</h2>
+<p><strong>BrowserTestCase</strong> is a sub classed unittest.TestCase designed to make
+working with Selenium Webdriver simpler. It can operate in headless mode to be
+used with continuous integration.</p>
+<p><strong>Page</strong> and <strong>Component</strong> represent a web app's pages, or the components
+that can be found on those pages.</p>
+<h2>License</h2>
+<p>Keteparaha is released under the MIT license, see LICENSE in the software
+repository for more details. Copyright 2015 by Hansel Dunlop.</p>
+
+
+  </div>
+
+  <div id="section-items">
+
+
+    <h2 class="section-title" id="header-classes">Classes</h2>
+
+      <div class="item">
+      <p id="keteparaha.BrowserTestCase" class="name">class <span class="ident">BrowserTestCase</span></p>
+
+
+    <div class="desc"><p>Browser test case that can be used with Selenium Webdriver to
+functionally test a website</p></div>
+  <div class="source_cont">
+</div>
+
+
+      <div class="class">
+          <h3>Ancestors (in MRO)</h3>
+          <ul class="class_list">
+          <li><a href="#keteparaha.BrowserTestCase">BrowserTestCase</a></li>
+          <li><a href="/unittest.case.TestCase.ext">unittest.case.TestCase</a></li>
+          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          </ul>
+          <h3>Instance variables</h3>
+            <div class="item">
+            <p id="keteparaha.BrowserTestCase.browser" class="name">var <span class="ident">browser</span></p>
+
+
+
+
+    <div class="desc"><p>Returns the last browser started</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.BrowserTestCase.browsers" class="name">var <span class="ident">browsers</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Methods</h3>
+
+  <div class="item">
+    <div class="name def" id="keteparaha.BrowserTestCase.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, *args, **kwargs)</p>
+    </div>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.BrowserTestCase.is_headless">
+    <p>def <span class="ident">is_headless</span>(</p><p>self)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Used to determine if the test is running in a headless env</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.BrowserTestCase.run">
+    <p>def <span class="ident">run</span>(</p><p>self, result=None)</p>
+    </div>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.BrowserTestCase.start_browser">
+    <p>def <span class="ident">start_browser</span>(</p><p>self, size=(1300, 1080), driver=&#39;Firefox&#39;)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Start and return a Selenium Webdriver browser instance</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+      </div>
+      </div>
+
+      <div class="item">
+      <p id="keteparaha.Component" class="name">class <span class="ident">Component</span></p>
+
+
+    <div class="desc"><p>Generic page component, intended to be subclassed</p>
+<p>Pages and Components are stored in a registry and switched to dynamically</p>
+<p>class ShoppingBasket(Component):
+    selector = '#shopping-basket'</p>
+<pre><code>def remove_item(self, name):
+    contents = self.get_components('tr')
+    for item in contents:
+        if name in item.text:
+            item.click('.remove')
+            return
+    raise AssertionError('No item in basket called "{}"'.format(name))
+</code></pre>
+<p>page = Page(driver)
+basket = page.click_link('Shopping Basket', opens=ShoppingBasket)</p>
+<h1>The following would also work identically:</h1>
+<h2>basket = page.click_link('Shopping Basket', opens='#shopping-basket')</h2>
+<p>basket.remove_item('Buzz Lightyear')</p></div>
+  <div class="source_cont">
+</div>
+
+
+      <div class="class">
+          <h3>Ancestors (in MRO)</h3>
+          <ul class="class_list">
+          <li><a href="#keteparaha.Component">Component</a></li>
+          <li><a href="/keteparaha.page._BaseComponent.ext">keteparaha.page._BaseComponent</a></li>
+          <li><a href="/keteparaha.page._SeleniumWrapper.ext">keteparaha.page._SeleniumWrapper</a></li>
+          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          </ul>
+          <h3>Class variables</h3>
+            <div class="item">
+            <p id="keteparaha.Component.ComponentMissing" class="name">var <span class="ident">ComponentMissing</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.Component.TimeoutException" class="name">var <span class="ident">TimeoutException</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.Component.selector" class="name">var <span class="ident">selector</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Instance variables</h3>
+            <div class="item">
+            <p id="keteparaha.Component.page" class="name">var <span class="ident">page</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.Component.text" class="name">var <span class="ident">text</span></p>
+
+
+
+
+    <div class="desc"><p>The visible text of the component</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.Component.url" class="name">var <span class="ident">url</span></p>
+
+
+
+
+    <div class="desc"><p>The url of the page which the component is inside</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Methods</h3>
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, parent, driver=None, find_by=&#39;selector&#39;)</p>
+    </div>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.clear">
+    <p>def <span class="ident">clear</span>(</p><p>self, selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Clear text out of input identified by CSS selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.click">
+    <p>def <span class="ident">click</span>(</p><p>self, selector=None, opens=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Main method for interacting with a page or component</p>
+<p>Returns either self, a new page object based on browser url, or a
+page component based on the selector passed in as 'opens'.
+selector can be a css selector in the form of a string, or a
+selenium WebElement.</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.click_button">
+    <p>def <span class="ident">click_button</span>(</p><p>self, button_text, opens=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Find buttons on the page and click the first one with the text</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.click_link">
+    <p>def <span class="ident">click_link</span>(</p><p>self, link_text, opens=None)</p>
+    </div>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.enter_text">
+    <p>def <span class="ident">enter_text</span>(</p><p>self, selector, text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Enter text into DOM element identified by selector</p>
+<p>The function performs some error checking because as of Jan 2014
+send_keys on the element is unreliable at text entry.</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.get_attribute">
+    <p>def <span class="ident">get_attribute</span>(</p><p>self, attribute)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return the value of an attribute of the component</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.get_clickable_element">
+    <p>def <span class="ident">get_clickable_element</span>(</p><p>self, selector, driver=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return an element that can be clicked, or raise an error</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.get_component">
+    <p>def <span class="ident">get_component</span>(</p><p>self, component_or_selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return an initialised component present in page</p>
+<p>takes either a component class to find in the page or a css selector.</p>
+<p>If the selector is not present in the page raises a ComponentMissing
+error.</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.get_components">
+    <p>def <span class="ident">get_components</span>(</p><p>self, component_or_selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return an list of initialised components present in page</p>
+<p>Returns an empty list if no components could be found</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.get_element">
+    <p>def <span class="ident">get_element</span>(</p><p>self, selector, driver=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Get the DOM element identified by the css selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.get_element_by_link_text">
+    <p>def <span class="ident">get_element_by_link_text</span>(</p><p>self, link_text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Get the DOM element identified by the css selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.get_elements">
+    <p>def <span class="ident">get_elements</span>(</p><p>self, selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Get a list of elements identified by the css selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.get_visible_element">
+    <p>def <span class="ident">get_visible_element</span>(</p><p>self, selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return an element that is visible, or raise an error</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.has_text">
+    <p>def <span class="ident">has_text</span>(</p><p>self, text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return whether the text is in the component</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.hover">
+    <p>def <span class="ident">hover</span>(</p><p>self, selector, opens=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Hover over element identified by CSS selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.location">
+    <p>def <span class="ident">location</span>(</p><p>self)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>The current page location without any query parameters</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.scroll_into_view">
+    <p>def <span class="ident">scroll_into_view</span>(</p><p>self)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Scroll the window until the component is visible</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.select_option">
+    <p>def <span class="ident">select_option</span>(</p><p>self, selector, option_text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Select option in dropdown identified by selector with given text</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.text_in_element">
+    <p>def <span class="ident">text_in_element</span>(</p><p>self, selector, text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return whether the text is in the element identified by selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Component.wait_for_invisibility">
+    <p>def <span class="ident">wait_for_invisibility</span>(</p><p>self, selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Pause until the element identified by selector is invisible</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+      </div>
+      </div>
+
+      <div class="item">
+      <p id="keteparaha.Page" class="name">class <span class="ident">Page</span></p>
+
+
+    <div class="desc"><p>Generic web page, intended to be subclassed</p>
+<p>Pages and Components are stored in a registry and switched to dynamically</p>
+<p>class LoginPage(Page):
+    url = 'https://your-site.com/login</p>
+<pre><code>def login(username, password):
+    self.enter_text("input[name=username]", username)
+    self.enter_text("input[name=password]", password)
+    return self.click("input[type=submit]")
+</code></pre></div>
+  <div class="source_cont">
+</div>
+
+
+      <div class="class">
+          <h3>Ancestors (in MRO)</h3>
+          <ul class="class_list">
+          <li><a href="#keteparaha.Page">Page</a></li>
+          <li><a href="/keteparaha.page._BaseComponent.ext">keteparaha.page._BaseComponent</a></li>
+          <li><a href="/keteparaha.page._SeleniumWrapper.ext">keteparaha.page._SeleniumWrapper</a></li>
+          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          </ul>
+          <h3>Class variables</h3>
+            <div class="item">
+            <p id="keteparaha.Page.ComponentMissing" class="name">var <span class="ident">ComponentMissing</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.Page.TimeoutException" class="name">var <span class="ident">TimeoutException</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Instance variables</h3>
+            <div class="item">
+            <p id="keteparaha.Page.page" class="name">var <span class="ident">page</span></p>
+
+
+
+
+    <div class="desc"><p>Unifies the api for pages and components slightly</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.Page.selector" class="name">var <span class="ident">selector</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.Page.text" class="name">var <span class="ident">text</span></p>
+
+
+
+
+    <div class="desc"><p>The visible text of the component</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Methods</h3>
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, driver=None)</p>
+    </div>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.clear">
+    <p>def <span class="ident">clear</span>(</p><p>self, selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Clear text out of input identified by CSS selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.click">
+    <p>def <span class="ident">click</span>(</p><p>self, selector=None, opens=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Main method for interacting with a page or component</p>
+<p>Returns either self, a new page object based on browser url, or a
+page component based on the selector passed in as 'opens'.
+selector can be a css selector in the form of a string, or a
+selenium WebElement.</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.click_button">
+    <p>def <span class="ident">click_button</span>(</p><p>self, button_text, opens=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Find buttons on the page and click the first one with the text</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.click_link">
+    <p>def <span class="ident">click_link</span>(</p><p>self, link_text, opens=None)</p>
+    </div>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.enter_text">
+    <p>def <span class="ident">enter_text</span>(</p><p>self, selector, text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Enter text into DOM element identified by selector</p>
+<p>The function performs some error checking because as of Jan 2014
+send_keys on the element is unreliable at text entry.</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.get_attribute">
+    <p>def <span class="ident">get_attribute</span>(</p><p>self, attribute)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return the value of an attribute of the component</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.get_clickable_element">
+    <p>def <span class="ident">get_clickable_element</span>(</p><p>self, selector, driver=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return an element that can be clicked, or raise an error</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.get_component">
+    <p>def <span class="ident">get_component</span>(</p><p>self, component_or_selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return an initialised component present in page</p>
+<p>takes either a component class to find in the page or a css selector.</p>
+<p>If the selector is not present in the page raises a ComponentMissing
+error.</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.get_components">
+    <p>def <span class="ident">get_components</span>(</p><p>self, component_or_selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return an list of initialised components present in page</p>
+<p>Returns an empty list if no components could be found</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.get_element">
+    <p>def <span class="ident">get_element</span>(</p><p>self, selector, driver=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Get the DOM element identified by the css selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.get_element_by_link_text">
+    <p>def <span class="ident">get_element_by_link_text</span>(</p><p>self, link_text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Get the DOM element identified by the css selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.get_elements">
+    <p>def <span class="ident">get_elements</span>(</p><p>self, selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Get a list of elements identified by the css selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.get_visible_element">
+    <p>def <span class="ident">get_visible_element</span>(</p><p>self, selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return an element that is visible, or raise an error</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.has_text">
+    <p>def <span class="ident">has_text</span>(</p><p>self, text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return whether the text is in the component</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.hover">
+    <p>def <span class="ident">hover</span>(</p><p>self, selector, opens=None)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Hover over element identified by CSS selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.location">
+    <p>def <span class="ident">location</span>(</p><p>self)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>The current page location without any query parameters</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.scroll_into_view">
+    <p>def <span class="ident">scroll_into_view</span>(</p><p>self)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Scroll the window until the component is visible</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.select_option">
+    <p>def <span class="ident">select_option</span>(</p><p>self, selector, option_text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Select option in dropdown identified by selector with given text</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.text_in_element">
+    <p>def <span class="ident">text_in_element</span>(</p><p>self, selector, text)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Return whether the text is in the element identified by selector</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.Page.wait_for_invisibility">
+    <p>def <span class="ident">wait_for_invisibility</span>(</p><p>self, selector)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Pause until the element identified by selector is invisible</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+      </div>
+      </div>
+
+  </div>
+
+</section>
+
+
+        <footer>
+            <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+        </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+  </body>
+</html>
