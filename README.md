@@ -1,6 +1,8 @@
 Keteparaha
 ==========
 
+[![Build Status](https://travis-ci.org/aychedee/keteparaha.svg)](https://travis-ci.org/aychedee/keteparaha)
+
 Keteparaha is a collection of tools to help when functional testing
 
 It contains utilities that assist with tasks like running a browser in a
