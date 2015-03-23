@@ -3,26 +3,23 @@ from unittest import TestCase
 from keteparaha.browser import BrowserTestCase
 
 
+class SubClassed(BrowserTestCase):
+
+    def do_nothing(self):
+        pass
+
+
 class BrowserTestCaseTest(TestCase):
 
-    class SubClassed(BrowserTestCase):
 
-        def do_nothing(self):
-            pass
 
-    def test_start_browser_when_given_unsupported_driver(self):
-        bc = self.SubClassed("do_nothing")
+    def test_browser_returns_last_browser_started(self):
 
-        with self.assertRaises(ValueError):
-            bc.start_browser(driver="NoReal")
+        btc = SubClassed('do_nothing')
 
-        self.assertEqual(bc._browsers, [])
+        btc.browsers.append('b1')
+        btc.browsers.append('b2')
+        btc.browsers.append('b3')
 
-    def test_browser_is_cleaned_up_afterwards(self):
-        bc = self.SubClassed("do_nothing")
-        bc.start_browser("Firefox")
+        self.assertEqual(btc.browser, 'b3')
 
-        bc.doCleanups()
-
-        with self.assertRaises(Exception):
-            bc.title
