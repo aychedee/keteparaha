@@ -6,14 +6,14 @@ from keteparaha.page import Component, Page
 
 
 class HomePage(Page):
-    url = u'https://obviously-not-real.com/'
+    url = 'https://obviously-not-real.com/'
 
     def get_elements(self, selector):
         return [i for i in range(10)]
 
 
 class CoolPage(Page):
-    url = u'https://obviously-not-real.com/path'
+    url = 'https://obviously-not-real.com/path'
 
 
 class Modal(Component):

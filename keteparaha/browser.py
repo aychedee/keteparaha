@@ -73,7 +73,11 @@ def snapshot_on_error(method):
 
         finally:
             if 'test_exception' in locals():
-                raise test_exception, None, test_traceback
+                try:
+                    raise test_exception, None, test_traceback
+                except SyntaxError:
+                    raise test_exception
+
     return wrapper
 
 
