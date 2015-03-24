@@ -73,9 +73,9 @@ def snapshot_on_error(method):
 
         finally:
             if 'test_exception' in locals():
-                try:
-                    raise test_exception, None, test_traceback
-                except SyntaxError:
+                if hasattr('with_traceback', test_exception):
+                    raise test_exception.with_traceback(test_traceback)
+                else:
                     raise test_exception
 
     return wrapper
