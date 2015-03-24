@@ -31,6 +31,7 @@ Example:
     dashboard = home.click_link('Dashboard')
 
 """
+from __future__ import unicode_literals
 import collections
 from inspect import isclass
 import time
@@ -83,7 +84,13 @@ class _Registry(collections.MutableMapping):
             return self.make_class(selector)
 
     def make_class(self, selector):
-        return type('DynamicComponent', (Component,), {'selector': selector})
+        try:
+            return type(
+                'DynamicComponent', (Component,), {'selector': selector})
+        except TypeError:  # Python < 3
+            return type(
+                b'DynamicComponent', (Component,), {'selector': selector})
+            return
 
 
 class _RegistryMeta(type):
@@ -134,7 +141,7 @@ class _SeleniumWrapper(object):
             return ComponentClass(self)
         except TimeoutException:
             raise self.ComponentMissing(
-                '"{}" could not be found in page'.format(
+                '"{0}" could not be found in page'.format(
                     ComponentClass.selector))
 
     def get_components(self, component_or_selector):
@@ -163,7 +170,7 @@ class _SeleniumWrapper(object):
         return _wait_for_condition(
             ec.presence_of_element_located((By.CSS_SELECTOR, selector)),
             self,
-            message='No element found with selector "{}".'.format(selector),
+            message='No element found with selector "{0}".'.format(selector),
             driver=driver
         )
 
@@ -172,7 +179,7 @@ class _SeleniumWrapper(object):
         return _wait_for_condition(
             ec.element_to_be_clickable((By.CSS_SELECTOR, selector)),
             self,
-            message='No clickable element found with selector "{}".'.format(
+            message='No clickable element found with selector "{0}".'.format(
                 selector),
             driver=driver
         )
@@ -182,7 +189,7 @@ class _SeleniumWrapper(object):
         return _wait_for_condition(
             ec.visibility_of_element_located((By.CSS_SELECTOR, selector)),
             self,
-            message='No visible element found with selector "{}".'.format(
+            message='No visible element found with selector "{0}".'.format(
                 selector)
         )
 
@@ -191,7 +198,7 @@ class _SeleniumWrapper(object):
         return _wait_for_condition(
             ec.presence_of_element_located((By.LINK_TEXT, link_text)),
             self,
-            message='No link with text "{}".'.format(link_text)
+            message='No link with text "{0}".'.format(link_text)
         )
 
     def get_elements(self, selector):
@@ -218,7 +225,7 @@ class _SeleniumWrapper(object):
             ec.text_to_be_present_in_element(
                 (By.CSS_SELECTOR, selector), text),
             self,
-            message=u'"{}" not found in "{}".'.format(
+            message='"{0}" not found in "{1}".'.format(
                 text, self.get_component(selector).text)
         )
 
@@ -227,7 +234,7 @@ class _SeleniumWrapper(object):
         return _wait_for_condition(
             text_to_be_present_in_component(self, text),
             self,
-            message=u'"{}" not found in "{}".'.format(
+            message='"{0}" not found in "{1}".'.format(
                 text, self._element.text)
         )
 
@@ -242,7 +249,7 @@ class _SeleniumWrapper(object):
 
         _wait_for_condition(
             component_to_be_clickable(component), component,
-            message='"{}" was never clickable'.format(self)
+            message='"{0}" was never clickable'.format(self)
         )
 
         component._element.click()
@@ -286,7 +293,7 @@ class _SeleniumWrapper(object):
             return self._click(self, opens)
 
         raise ValueError(
-            'selector, "{}", not a string or Component instance.'.format(
+            'selector, "{0}", not a string or Component instance.'.format(
                 selector))
 
     def click_link(self, link_text, opens=None):
@@ -352,7 +359,7 @@ class _SeleniumWrapper(object):
                 return  # Element is not user editable and can't be cleared
 
             time.sleep(0.2)
-        raise AssertionError("Unable to correctly type {}".format(text))
+        raise AssertionError("Unable to correctly type {0}".format(text))
 
 
 class _WebElementProxy(object):
@@ -374,7 +381,7 @@ class _WebElementProxy(object):
                             selector
                         )
                     ),
-                    'No element "{}", waited {} seconds'.format(
+                    'No element "{0}", waited {1} seconds'.format(
                         selector, ELEMENT_TIMEOUT
                     )
                 )
@@ -398,7 +405,7 @@ class _WebElementProxy(object):
                             selector
                         )
                     ),
-                    'No link with text "{}", waited {} seconds'.format(
+                    'No link with text "{0}", waited {1} seconds'.format(
                         selector, ELEMENT_TIMEOUT
                     )
                 )
@@ -447,7 +454,7 @@ class Component(_BaseComponent, _SeleniumWrapper):
                 if name in item.text:
                     item.click('.remove')
                     return
-            raise AssertionError('No item in basket called "{}"'.format(name))
+            raise AssertionError('No item in basket called "{0}"'.format(name))
 
     page = Page(driver)
     basket = page.click_link('Shopping Basket', opens=ShoppingBasket)
@@ -462,10 +469,10 @@ class Component(_BaseComponent, _SeleniumWrapper):
     selector = None
 
     def __repr__(self):
-        output = '{}(selector="{}")'.format(
+        output = '{0}(selector="{1}")'.format(
             self.__class__.__name__, self.selector)
         if self._find_by == 'index_position':
-            output = output + '[{}]'.format(self._index_position)
+            output = output + '[{0}]'.format(self._index_position)
         return output
 
     def __init__(self, parent, driver=None, find_by='selector'):
