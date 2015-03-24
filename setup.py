@@ -34,7 +34,6 @@ def doc_filter(doc):
         doc.name in FILTERED_METHODS
     ):
         return False
-    print doc.name
     return True
 
 
