@@ -57,6 +57,13 @@ ELEMENT_TIMEOUT = 10
 __all__ = ['Component', 'Page']
 
 
+# Workaround for backwards compatibility with Python 2.7
+try:
+    unicode = unicode
+except NameError:
+    basestring = (str, bytes)
+
+
 class _Registry(collections.MutableMapping):
     """A singleton registry for pages and components"""
     store = dict()
