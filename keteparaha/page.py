@@ -97,7 +97,6 @@ class _RegistryMeta(type):
     """Add our pages and components to a central registry"""
 
     def __init__(cls, name, bases, dct):
-        cls._registry = _Registry()
         if dct.get('url'):
             cls._registry[dct.get('url')] = cls
         elif dct.get('selector'):
@@ -464,8 +463,10 @@ class Component(_BaseComponent, _SeleniumWrapper):
     basket.remove_item('Buzz Lightyear')
 
     """
+
     __metaclass__ = _RegistryMeta
     _driver = WebDriverOnly()
+    _registry = _Registry()
     selector = None
 
     def __repr__(self):
@@ -510,6 +511,7 @@ class Page(_BaseComponent, _SeleniumWrapper):
     """
     __metaclass__ = _RegistryMeta
     _driver = WebDriverOnly()
+    _registry = _Registry()
 
     def __init__(self, driver=None):
         self._find_by = 'selector'
