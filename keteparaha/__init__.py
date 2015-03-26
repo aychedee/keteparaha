@@ -23,6 +23,50 @@ used with continuous integration.
 **Page** and **Component** represent a web app's pages, or the components
 that can be found on those pages.
 
+    from keteparaha import BrowserTestCase, Component, Page
+
+    SERVER_URL = 'http://www.simple.com/{}'
+    # Pages are identified by their full URL with any GET parameters
+    # stripped off
+
+
+    class LoginPage(Page):
+        url = SERVER_URL.format('login/')
+
+        def login(self, email, password):
+            self.enter_text('input[name=email]', email)
+            self.enter_text('input[name=password]', email)
+            return self.click('input[name=submut]')
+
+
+    class Dashboard(Page):
+        url = SERVER_URL.format('dashboard/')
+
+        def logged_in_username(self):
+            return self.get_component('.username').text
+
+        def open_comment_modal(self, comment):
+            return self.click_button('Feedback', opens='#comment')
+
+
+    class CommentModal(Component)
+        selector = '#comment'
+
+        def comment(self, message):
+            self.enter_text('input[name=message]', message)
+            self.click('input[type=submit]')
+
+
+    # User logs in and is redirected to the dashboard
+    dashboard = LoginPage(self.driver).login('a@b.com', 'xxxxx')
+
+    # Their username is in the top menu
+    self.assertEqual(dashboard.logged_in_username(), 'aychedee')
+
+    # They can leave some feedback for the site owner
+    comment_modal = dashboard.open_comment_modal()
+    comment_modal.comment("Is it tea you're looking for?")
+
 License
 -------
 
@@ -42,4 +86,13 @@ from .browser import (
 from .flow import ignore, retry
 
 __version__ = '0.0.12'
-__all__ = ['BrowserTestCase', 'Component', 'Page']
+__all__ = [
+    'BrowserTestCase',
+    'Component',
+    'GmailImapClient',
+    'HeadlessBrowserTestCase',
+    'ignore',
+    'Page',
+    'retry',
+    'snapshot_on_error'
+]
