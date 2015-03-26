@@ -75,6 +75,50 @@ working with Selenium Webdriver simpler. It can operate in headless mode to be
 used with continuous integration.</p>
 <p><strong>Page</strong> and <strong>Component</strong> represent a web app's pages, or the components
 that can be found on those pages.</p>
+<pre><code>from keteparaha import BrowserTestCase, Component, Page
+
+SERVER_URL = 'http://www.simple.com/{}'
+# Pages are identified by their full URL with any GET parameters
+# stripped off
+
+
+class LoginPage(Page):
+    url = SERVER_URL.format('login/')
+
+    def login(self, email, password):
+        self.enter_text('input[name=email]', email)
+        self.enter_text('input[name=password]', email)
+        return self.click('input[name=submut]')
+
+
+class Dashboard(Page):
+    url = SERVER_URL.format('dashboard/')
+
+    def logged_in_username(self):
+        return self.get_component('.username').text
+
+    def open_comment_modal(self, comment):
+        return self.click_button('Feedback', opens='#comment')
+
+
+class CommentModal(Component)
+    selector = '#comment'
+
+    def comment(self, message):
+        self.enter_text('input[name=message]', message)
+        self.click('input[type=submit]')
+
+
+# User logs in and is redirected to the dashboard
+dashboard = LoginPage(self.driver).login('a@b.com', 'xxxxx')
+
+# Their username is in the top menu
+self.assertEqual(dashboard.logged_in_username(), 'aychedee')
+
+# They can leave some feedback for the site owner
+comment_modal = dashboard.open_comment_modal()
+comment_modal.comment("Is it tea you're looking for?")
+</code></pre>
 <h2>License</h2>
 <p>Keteparaha is released under the MIT license, see LICENSE in the software
 repository for more details. Copyright 2015 by Hansel Dunlop.</p>
@@ -83,6 +127,55 @@ repository for more details. Copyright 2015 by Hansel Dunlop.</p>
   </div>
 
   <div id="section-items">
+
+    <h2 class="section-title" id="header-functions">Functions</h2>
+
+  <div class="item">
+    <div class="name def" id="keteparaha.ignore">
+    <p>def <span class="ident">ignore</span>(</p><p>func, errors)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Ignore exceptions given in errors</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.retry">
+    <p>def <span class="ident">retry</span>(</p><p>func, errors, attempts=5)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Retry the action if an exception occurs</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.snapshot_on_error">
+    <p>def <span class="ident">snapshot_on_error</span>(</p><p>method)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>A decorator that captures a snapshot of all browsers on error</p>
+<p>By default these are saved in the home directory, to change the
+snapshot location set SNAPSHOT_PATH on the test case. The snapshot
+directory will be created if possible.</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
 
 
     <h2 class="section-title" id="header-classes">Classes</h2>
@@ -202,7 +295,7 @@ functionally test a website</p></div>
         if name in item.text:
             item.click('.remove')
             return
-    raise AssertionError('No item in basket called "{}"'.format(name))
+    raise AssertionError('No item in basket called "{0}"'.format(name))
 </code></pre>
 <p>page = Page(driver)
 basket = page.click_link('Shopping Basket', opens=ShoppingBasket)</p>
@@ -289,7 +382,7 @@ basket = page.click_link('Shopping Basket', opens=ShoppingBasket)</p>
 
   <div class="item">
     <div class="name def" id="keteparaha.Component.__init__">
-    <p>def <span class="ident">__init__</span>(</p><p>self, parent, driver=None, find_by=&#39;selector&#39;)</p>
+    <p>def <span class="ident">__init__</span>(</p><p>self, parent, driver=None, find_by=u&#39;selector&#39;)</p>
     </div>
 
 
@@ -604,6 +697,289 @@ error.</p></div>
 
 
     <div class="desc"><p>Pause until the element identified by selector is invisible</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+      </div>
+      </div>
+
+      <div class="item">
+      <p id="keteparaha.GmailImapClient" class="name">class <span class="ident">GmailImapClient</span></p>
+
+
+    <div class="desc"><p>Imap client with some specific methods for working with gmail</p></div>
+  <div class="source_cont">
+</div>
+
+
+      <div class="class">
+          <h3>Ancestors (in MRO)</h3>
+          <ul class="class_list">
+          <li><a href="#keteparaha.GmailImapClient">GmailImapClient</a></li>
+          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          </ul>
+          <h3>Class variables</h3>
+            <div class="item">
+            <p id="keteparaha.GmailImapClient.IMAP_SERVER" class="name">var <span class="ident">IMAP_SERVER</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.GmailImapClient.IMAP_SERVER_PORT" class="name">var <span class="ident">IMAP_SERVER_PORT</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Instance variables</h3>
+            <div class="item">
+            <p id="keteparaha.GmailImapClient.client" class="name">var <span class="ident">client</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.GmailImapClient.email_address" class="name">var <span class="ident">email_address</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.GmailImapClient.messages_for_this_session" class="name">var <span class="ident">messages_for_this_session</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.GmailImapClient.password" class="name">var <span class="ident">password</span></p>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Methods</h3>
+
+  <div class="item">
+    <div class="name def" id="keteparaha.GmailImapClient.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, email_address, password)</p>
+    </div>
+
+
+
+
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.GmailImapClient.delete_seen_messages">
+    <p>def <span class="ident">delete_seen_messages</span>(</p><p>self)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Delete messages that have been accessed with this client</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.GmailImapClient.emails_from_messages">
+    <p>def <span class="ident">emails_from_messages</span>(</p><p>self, messages)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Convert a list of IMAP messages into email objects</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.GmailImapClient.gmail_search">
+    <p>def <span class="ident">gmail_search</span>(</p><p>self, query)</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Search the gmail imap server using gmail queries</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.GmailImapClient.search">
+    <p>def <span class="ident">search</span>(</p><p>self, from_address, to_address, subject, since=datetime.datetime(2015, 3, 26, 8, 30, 10, 560983))</p>
+    </div>
+
+
+
+
+    <div class="desc"><p>Search for emails on an IMAP server</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+      </div>
+      </div>
+
+      <div class="item">
+      <p id="keteparaha.HeadlessBrowserTestCase" class="name">class <span class="ident">HeadlessBrowserTestCase</span></p>
+
+
+    <div class="desc"><p>Seleniun Webdiver test case for headless environemnts</p>
+<p>Browser test case that will start a virtual display to run the
+Webdriver browser in before running test cases</p></div>
+  <div class="source_cont">
+</div>
+
+
+      <div class="class">
+          <h3>Ancestors (in MRO)</h3>
+          <ul class="class_list">
+          <li><a href="#keteparaha.HeadlessBrowserTestCase">HeadlessBrowserTestCase</a></li>
+          <li><a href="#keteparaha.BrowserTestCase">BrowserTestCase</a></li>
+          <li><a href="/unittest.case.TestCase.ext">unittest.case.TestCase</a></li>
+          <li><a href="/__builtin__.object.ext">__builtin__.object</a></li>
+          </ul>
+          <h3>Instance variables</h3>
+            <div class="item">
+            <p id="keteparaha.HeadlessBrowserTestCase.browser" class="name">var <span class="ident">browser</span></p>
+
+    <p class="inheritance">
+     <strong>Inheritance:</strong>
+       <code><a href="#keteparaha.BrowserTestCase">BrowserTestCase</a></code>.<code><a href="#keteparaha.BrowserTestCase.browser">browser</a></code>
+    </p>
+
+
+
+    <div class="desc inherited"><p>Returns the last browser started</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="keteparaha.HeadlessBrowserTestCase.browsers" class="name">var <span class="ident">browsers</span></p>
+
+    <p class="inheritance">
+     <strong>Inheritance:</strong>
+       <code><a href="#keteparaha.BrowserTestCase">BrowserTestCase</a></code>.<code><a href="#keteparaha.BrowserTestCase.browsers">browsers</a></code>
+    </p>
+
+
+
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Methods</h3>
+
+  <div class="item">
+    <div class="name def" id="keteparaha.HeadlessBrowserTestCase.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, *args, **kwargs)</p>
+    </div>
+
+    <p class="inheritance">
+     <strong>Inheritance:</strong>
+       <code><a href="#keteparaha.BrowserTestCase">BrowserTestCase</a></code>.<code><a href="#keteparaha.BrowserTestCase.__init__">__init__</a></code>
+    </p>
+
+
+
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.HeadlessBrowserTestCase.is_headless">
+    <p>def <span class="ident">is_headless</span>(</p><p>self)</p>
+    </div>
+
+    <p class="inheritance">
+     <strong>Inheritance:</strong>
+       <code><a href="#keteparaha.BrowserTestCase">BrowserTestCase</a></code>.<code><a href="#keteparaha.BrowserTestCase.is_headless">is_headless</a></code>
+    </p>
+
+
+
+    <div class="desc inherited"><p>Used to determine if the test is running in a headless env</p></div>
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.HeadlessBrowserTestCase.run">
+    <p>def <span class="ident">run</span>(</p><p>self, result=None)</p>
+    </div>
+
+    <p class="inheritance">
+     <strong>Inheritance:</strong>
+       <code><a href="#keteparaha.BrowserTestCase">BrowserTestCase</a></code>.<code><a href="#keteparaha.BrowserTestCase.run">run</a></code>
+    </p>
+
+
+
+  <div class="source_cont">
+</div>
+
+  </div>
+
+
+  <div class="item">
+    <div class="name def" id="keteparaha.HeadlessBrowserTestCase.start_browser">
+    <p>def <span class="ident">start_browser</span>(</p><p>self, size=(1300, 1080), driver=&#39;Firefox&#39;, **kwargs)</p>
+    </div>
+
+    <p class="inheritance">
+     <strong>Inheritance:</strong>
+       <code><a href="#keteparaha.BrowserTestCase">BrowserTestCase</a></code>.<code><a href="#keteparaha.BrowserTestCase.start_browser">start_browser</a></code>
+    </p>
+
+
+
+    <div class="desc"><p>Start xvfb headless display and a browser inside it</p>
+<p>Extra keyword args are passed directly to the XvFB interface</p></div>
   <div class="source_cont">
 </div>
 
