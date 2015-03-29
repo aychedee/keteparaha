@@ -1,3 +1,4 @@
 imapclient
 pyvirtualdisplay
 selenium
+six

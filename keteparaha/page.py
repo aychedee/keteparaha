@@ -42,6 +42,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import TimeoutException, WebDriverWait
+from six import with_metaclass
 
 from .expectations import (
     _wait_for_condition,
@@ -446,7 +447,8 @@ class _BaseComponent(object):
         return self._element.text
 
 
-class Component(_BaseComponent, _SeleniumWrapper):
+class Component(
+    with_metaclass(_RegistryMeta, _BaseComponent, _SeleniumWrapper)):
     """Generic page component, intended to be subclassed
 
     Pages and Components are stored in a registry and switched to dynamically
@@ -471,7 +473,6 @@ class Component(_BaseComponent, _SeleniumWrapper):
 
     """
 
-    __metaclass__ = _RegistryMeta
     _driver = WebDriverOnly()
     _registry = _Registry()
     selector = None
@@ -503,7 +504,8 @@ class Component(_BaseComponent, _SeleniumWrapper):
         return self.page.url
 
 
-class Page(_BaseComponent, _SeleniumWrapper):
+class Page(
+    with_metaclass(_RegistryMeta, _BaseComponent, _SeleniumWrapper)):
     """Generic web page, intended to be subclassed
 
     Pages and Components are stored in a registry and switched to dynamically
@@ -516,7 +518,6 @@ class Page(_BaseComponent, _SeleniumWrapper):
             self.enter_text("input[name=password]", password)
             return self.click("input[type=submit]")
     """
-    __metaclass__ = _RegistryMeta
     _driver = WebDriverOnly()
     _registry = _Registry()
 

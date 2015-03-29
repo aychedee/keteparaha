@@ -16,6 +16,7 @@ from functools import wraps
 import math
 import os
 from selenium import webdriver
+from six import reraise
 import sys
 import time
 import unittest
@@ -47,9 +48,9 @@ def snapshot_on_error(method):
             os.makedirs(snapshot_path)
         try:
             method(self, *args, **kwargs)
-        except BaseException as test_exception:
+        except BaseException:
 
-            test_traceback = sys.exc_info()[2]
+            test_exc_type, test_exc, test_traceback = sys.exc_info()
             for idx, browser in enumerate(self.browsers):
                 try:
                     body = browser.find_element_by_tag_name('body')
@@ -72,11 +73,8 @@ def snapshot_on_error(method):
                     )
 
         finally:
-            if 'test_exception' in locals():
-                if hasattr('with_traceback', test_exception):
-                    raise test_exception.with_traceback(test_traceback)
-                else:
-                    raise test_exception
+            if 'test_exc' in locals():
+                reraise(test_exc_type, test_exc.args[0], tb=test_traceback)
 
     return wrapper
 
