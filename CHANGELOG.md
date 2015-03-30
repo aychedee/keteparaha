@@ -4,6 +4,7 @@
 ### Changed
 - Bugfix, we handle stale elements when waiting for them to be clickable
 - Bugfix, Components can be used to instantiate a page
+- Library compatible with Python 2.7+
 
 ## [0.0.16] [2015-03-18]
 ### Changed
