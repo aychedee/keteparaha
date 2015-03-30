@@ -473,7 +473,6 @@ class Component(
 
     """
 
-    _driver = WebDriverOnly()
     _registry = _Registry()
     selector = None
 
@@ -524,7 +523,10 @@ class Page(
     def __init__(self, driver=None):
         self._find_by = 'selector'
         self.selector = 'html'
-        self._driver = driver
+        try:
+            self._driver = driver
+        except TypeError:   # Driver was a WebElement, not WebDriver
+            self._driver = driver.parent
         if self.location() != self.url:
             self._driver.get(self.url)
 
