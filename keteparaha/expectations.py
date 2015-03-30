@@ -1,4 +1,5 @@
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import StaleElementReferenceException
 
 
 def _wait_for_condition(
@@ -29,9 +30,10 @@ class component_to_be_clickable(object):
         self.component = component
 
     def __call__(self, driver):
-        return (
-            self.component._element.is_enabled()
-            and self.component._element.is_displayed()
-        )
-
-
+        try:
+            return (
+                self.component._element.is_enabled()
+                and self.component._element.is_displayed()
+            )
+        except StaleElementReferenceException:
+            return False

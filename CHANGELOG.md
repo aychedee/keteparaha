@@ -1,7 +1,8 @@
 # Changelog
+
 ## [unreleased] [unreleased]
 ### Changed
--
+- Bugfix, we handle stale elements when waiting for them to be clickable
 
 ## [0.0.16] [2015-03-18]
 ### Changed
