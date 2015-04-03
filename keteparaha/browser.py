@@ -141,7 +141,7 @@ class HeadlessBrowserTestCase(BrowserTestCase):
         Extra keyword args are passed directly to the XvFB interface
 
         """
-        if not hasattr(self, "_display"):
+        if not getattr(self, "_display"):
             from pyvirtualdisplay import Display
             self._display = Display(visible=0, size=size, **kwargs)
             self._display.start()

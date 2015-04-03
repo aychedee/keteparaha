@@ -2,7 +2,7 @@
 
 ## [unreleased] [unreleased]
 ### Changed
--
+- Previous release broke the headlesss browser functionality
 
 ## [0.0.17] [2015-04-02]
 ### Changed
