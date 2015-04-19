@@ -78,5 +78,5 @@ class GmailImapClient(object):
         response = self.client.fetch(messages, ["RFC822"])
         return [
             email.message_from_string(data["RFC822"])
-            for _, data in response.iteritems()
+            for _, data in response.items()
         ]
