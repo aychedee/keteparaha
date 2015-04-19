@@ -35,7 +35,6 @@ class RetryTest(TestCase):
         def test_func(*args, **kwargs):
             global counter
             if counter > 0:
-                print counter
                 counter -= 1
                 raise Exception()
             return args, kwargs
@@ -52,7 +51,6 @@ class RetryTest(TestCase):
         def test_func(*args, **kwargs):
             global counter
             if counter > 0:
-                print counter
                 counter -= 1
                 raise Exception()
             return args, kwargs
