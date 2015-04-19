@@ -74,7 +74,7 @@ def snapshot_on_error(method):
 
         finally:
             if 'test_exc' in locals():
-                reraise(test_exc_type, test_exc.args, tb=test_traceback)
+                reraise(test_exc_type, test_exc, test_traceback)
 
     return wrapper
 

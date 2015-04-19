@@ -3,6 +3,7 @@
 ## [unreleased] [unreleased]
 ### Changed
 - Previous release broke the headlesss browser functionality
+- snapshot on error can handle exceptions raised without messages
 
 ## [0.0.17] [2015-04-02]
 ### Changed
