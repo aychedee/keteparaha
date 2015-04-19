@@ -1,7 +1,7 @@
 Keteparaha
 ==========
 
-[![Join the chat at https://gitter.im/aychedee/keteparaha](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/aychedee/keteparaha?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PyPI version](https://badge.fury.io/py/keteparaha.svg)](http://badge.fury.io/py/keteparaha) [![Build Status](https://travis-ci.org/aychedee/keteparaha.svg)](https://travis-ci.org/aychedee/keteparaha)
+[![Join the chat at https://gitter.im/aychedee/keteparaha](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/aychedee/keteparaha?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PyPI version](https://badge.fury.io/py/keteparaha.svg)](http://badge.fury.io/py/keteparaha) [![Build Status](https://travis-ci.org/aychedee/keteparaha.svg)](https://travis-ci.org/aychedee/keteparaha) [![Coverage Status](https://coveralls.io/repos/aychedee/keteparaha/badge.svg?branch=master)](https://coveralls.io/r/aychedee/keteparaha?branch=master)
 
 Keteparaha is a collection of tools to help when functional testing
 
