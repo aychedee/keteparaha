@@ -74,6 +74,9 @@ class MockDriver(WebDriver):
     def click(self):
         pass
 
+    def send_keys(*text):
+        raise Exception('Send keys called with {}'.format(text))
+
 
 class MockParent(object):
     _driver = ''
@@ -166,3 +169,12 @@ class ComponentTest(TestCase):
         modal_next = modal.click('.btn', opens=ModalNext)
 
         self.assertIsInstance(modal_next, ModalNext)
+
+    def test_enter_text_calls_elements_send_keys_method(self):
+        home = HomePage(driver=MockDriver())
+        modal = home.get_component('#modal-id')
+
+        with self.assertRaises(Exception) as exc:
+            modal.enter_text('selector', 'test text')
+
+        self.assertIn("'t', 'e', 's', 't'", exc.exception.args[0], '')
