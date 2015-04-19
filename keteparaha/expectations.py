@@ -1,3 +1,6 @@
+"""
+    Conditions using Keteparaha components
+"""
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import StaleElementReferenceException
 
@@ -13,7 +16,7 @@ def _wait_for_condition(
 
 
 class text_to_be_present_in_component(object):
-    """ An expectation for checking if the given text is present in the
+    """An expectation for checking if the given text is present in the
     provided component.
     """
     def __init__(self, component, text_):
@@ -25,7 +28,7 @@ class text_to_be_present_in_component(object):
 
 
 class component_to_be_clickable(object):
-    """ An expectation that checks if the given component is clickable """
+    """An expectation that checks if the given component is clickable """
     def __init__(self, component):
         self.component = component
 
