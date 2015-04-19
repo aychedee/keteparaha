@@ -1,6 +1,8 @@
 # Changelog
-
 ## [unreleased] [unreleased]
+### Changed
+
+## [0.0.18] [2015-04-20]
 ### Changed
 - Previous release broke the headlesss browser functionality
 - snapshot on error can handle exceptions raised without messages

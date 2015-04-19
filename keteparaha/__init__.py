@@ -75,7 +75,7 @@ repository for more details. Copyright 2015 by Hansel Dunlop.
 
 """
 
-__version__ = '0.0.17'
+__version__ = '0.0.18'
 from .email_client import GmailImapClient
 from .page import Component, Page
 from .browser import (
@@ -85,7 +85,6 @@ from .browser import (
 )
 from .flow import ignore, retry
 
-__version__ = '0.0.12'
 __all__ = [
     'BrowserTestCase',
     'Component',
