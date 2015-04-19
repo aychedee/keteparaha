@@ -6,6 +6,11 @@ python:
   - "3.4"
   - "nightly"
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install:
+  - "pip install -r requirements.txt"
+  - "pip install coveralls"
 # command to run tests
-script: nosetests
+script:
+  - "nosetests --with-coverage --cover-package=keteparaha"
+after_success:
+  - "coveralls"
