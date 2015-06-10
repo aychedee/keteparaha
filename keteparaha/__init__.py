@@ -75,7 +75,6 @@ repository for more details. Copyright 2015 by Hansel Dunlop.
 
 """
 
-__version__ = '0.0.18'
 from .email_client import GmailImapClient
 from .page import Component, Page
 from .browser import (

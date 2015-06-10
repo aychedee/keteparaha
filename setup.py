@@ -52,7 +52,7 @@ if sys.argv[1] == 'document':
 
 setup(
     name='keteparaha',
-    version=module.__version__,
+    version='0.0.19',
     packages=['keteparaha'],
     license='MIT',
     author="Hansel Dunlop",
