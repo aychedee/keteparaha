@@ -6,8 +6,6 @@ try:
 except ImportError:
     from distutils.core import setup
 
-module = __import__('keteparaha')
-
 FILTERED_METHODS = [
     'addCleanup',
     'addTypeEquality',
@@ -49,10 +47,11 @@ if sys.argv[1] == 'document':
         f.write(docs)
     sys.exit(0)
 
+# To update the package on pypi: python setup.py sdist upload
 
 setup(
     name='keteparaha',
-    version='0.0.19',
+    version='0.0.20',
     packages=['keteparaha'],
     license='MIT',
     author="Hansel Dunlop",
