@@ -49,6 +49,7 @@ from .expectations import (
     component_to_be_clickable,
     text_to_be_present_in_component
 )
+from . import flow
 
 ELEMENT_TIMEOUT = 10
 """ (int): The seconds that a component will wait to be visible, clickable, or
@@ -320,7 +321,16 @@ class _SeleniumWrapper(object):
 
     def select_option(self, selector, option_text):
         """Select option in dropdown identified by selector with given text"""
-        Select(self.get_element(selector)).select_by_visible_text(option_text)
+
+        def find_and_select(selector, option_text):
+            return Select(
+                self.get_element(selector)
+            ).select_by_visible_text(option_text),
+
+        retryable_find_and_select = flow.retry(
+            find_and_select, exceptions.NoSuchElementException
+        )
+        return retryable_find_and_select(selector, option_text)
 
     def scroll_into_view(self):
         """Scroll the window until the component is visible"""

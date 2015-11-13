@@ -51,7 +51,7 @@ if sys.argv[1] == 'document':
 
 setup(
     name='keteparaha',
-    version='0.0.21',
+    version='0.0.22',
     packages=['keteparaha'],
     license='MIT',
     author="Hansel Dunlop",
