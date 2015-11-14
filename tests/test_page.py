@@ -37,6 +37,7 @@ class ModalNext(Component):
 class MockDriver(WebDriver):
 
     current_url = ''
+    session_id = ''
 
     def __init__(self):
         self.current_url = ''
