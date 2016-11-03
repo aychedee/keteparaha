@@ -43,6 +43,8 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import TimeoutException, WebDriverWait
 from six import with_metaclass
+from urlparse import parse_qs, urlparse
+import re
 
 from .expectations import (
     _wait_for_condition,
@@ -64,6 +66,26 @@ try:
     unicode = unicode
 except NameError:
     basestring = (str, bytes)
+
+
+def match_url(url, candidates):
+    parsed = urlparse(url)
+    for candidate in candidates:
+        if not isinstance(candidate, basestring):
+            continue
+        if re.match(r'https?://', candidate):
+            candidate_path = urlparse(candidate).path
+        else:
+            candidate_path = candidate
+        match = re.match(candidate_path, parsed.path)
+        if match:
+            kwargs = match.groupdict()
+            args = tuple(set(match.groups()) - set(kwargs.values()))
+            if parsed.query:
+                kwargs['_query'] = parse_qs(parsed.query)
+            if parsed.fragment:
+                kwargs['_fragment'] = parsed.fragment
+            return candidate, args, kwargs
 
 
 class _Registry(collections.MutableMapping):
@@ -100,6 +122,9 @@ class _Registry(collections.MutableMapping):
             return type(
                 b'DynamicComponent', (Component,), {'selector': selector})
             return
+
+    def keys(self):
+        return self.store.keys()
 
 
 class _RegistryMeta(type):
@@ -272,7 +297,19 @@ class _SeleniumWrapper(object):
             return opens
 
         if self.url != self.location() and self.location() in self._registry:
+             # We have a page with a simple url
             return self._registry(self.location())(driver=self._driver)
+        if (not match_url(self.url, (self.location(),))
+            and match_url(self.location(), self._registry.keys())):
+            # We have a page with a complex url that's in the registry
+                match, args, kwargs = match_url(
+                    self.location(),
+                    self._registry.keys()
+                )
+                page = self._registry[match](driver=self._driver)
+                page.setup(*args, **kwargs)
+                return page
+
         return self
 
     def click(self, selector=None, opens=None):
@@ -317,7 +354,7 @@ class _SeleniumWrapper(object):
 
     def location(self):
         """The current page location without any query parameters"""
-        return self.page._driver.current_url.split('?')[0]
+        return self.page._driver.current_url
 
     def select_option(self, selector, option_text):
         """Select option in dropdown identified by selector with given text"""
@@ -539,6 +576,13 @@ class Page(
             self._driver = driver.parent
         if self.location() != self.url:
             self._driver.get(self.url)
+
+    def setup(self, *args, **kwargs):
+        raise NotImplementedError(
+            'Pages that implement a complex url need to implement a setup'
+            'method. This page is ' 'being passed args: {} and kwargs: '
+            '{}'.format(args, kwargs)
+        )
 
     @property
     def page(self):

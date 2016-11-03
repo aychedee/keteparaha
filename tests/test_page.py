@@ -15,6 +15,17 @@ class HomePage(Page):
 class CoolPage(Page):
     url = 'https://obviously-not-real.com/path'
 
+    def setup(self, _query):
+        self.query = _query
+
+
+class ComplexPathPage(Page):
+    url = r'/s/([0-9]{4})/(?P<slug>[\w]+)/$'
+
+    def setup(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
 
 class Modal(Component):
     selector = '#modal-id'
@@ -87,10 +98,28 @@ class PageTest(TestCase):
 
     def test_dynamically_switches_page_class_based_on_url(self):
         home = HomePage(driver=MockDriver())
-        home._driver.current_url = CoolPage.url
+        home._driver.current_url = CoolPage.url + '?search=hello'
         cool_page = home.click('.btn')
 
         self.assertIsInstance(cool_page, CoolPage)
+        self.assertEqual(cool_page.query, {'search': ['hello']})
+
+    def test_dynamically_passes_captured_url_elements_to_component(self):
+        home = HomePage(driver=MockDriver())
+        home._driver.current_url = ComplexPathPage.url.replace(
+            '([0-9]{4})', '9999').replace(
+            '(?P<slug>[\w]+)/$', 'thisisthearticle/'
+        ) + '?hello=world&testers=are_people#fragment'
+        complex_page = home.click('.btn')
+
+        self.assertIsInstance(complex_page, ComplexPathPage)
+        self.assertEqual(complex_page.args, ('9999',))
+        self.assertEqual(complex_page.kwargs['slug'], 'thisisthearticle')
+        self.assertEqual(
+            complex_page.kwargs['_query'],
+            {'hello': ['world'], 'testers': ['are_people']}
+        )
+        self.assertEqual(complex_page.kwargs['_fragment'], 'fragment')
 
     def test_dynamically_returns_component(self):
         home = HomePage(driver=MockDriver())
